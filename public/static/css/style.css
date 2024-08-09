@@ -1,0 +1,162 @@
+:root {
+  --background-color: white;
+  --color: black;
+  --page-width: 768px;
+  --navbar-width: 50%;
+  --font-family: sans-serif;
+  --logo: url('logo.png');
+  --unemph-color: #505050;
+  --hover-background: #dcdcdc;
+  --hover-border: #aaa;
+  --line-height: 1.7;
+  --smaller-font: 0.75em;
+  --hyper-color: #0f82af;
+  text-align: justify;
+  margin: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #1d2021;
+    --color: white;
+    --hover-background: #282c2d;
+    --unemph-color: #909090;
+    --hover-border: #505050;
+    --hyper-color: #00b4db;
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --page-width: 90%;
+    --navbar-width: 50vh;
+  }
+}
+
+html {
+  background-color: var(--background-color);
+  color: var(--color);
+  font-family: var(--font-family);
+  line-height: var(--line-height);
+}
+
+html, body {
+  margin: 0 auto;
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--hyper-color);
+}
+
+.banner {
+  padding: 6vh;
+  box-shadow: 0 15vh 30vh black inset;
+  background-position: 50%;
+  background-size: cover;
+  margin-bottom: 1em;
+}
+
+.input-title {
+  font-size: 2em;
+  text-align: center;
+  width: 100%;
+  background-color: #00000000;
+  border-color: #00000000;
+  color: white;
+  margin-bottom: -0.2em;
+}
+
+.input-slogan {
+  text-align: center;
+  width: 100%;
+  background-color: #00000000;
+  border-color: #00000000;
+  color: white;
+  line-height: 1em;
+  margin: 0.5em auto 0em auto;
+}
+
+div.profilepicture img {
+  display: flex;
+  margin: 0 auto;
+  margin-top: 2em;
+  width: 50%;
+  max-width: 250px;
+  border-radius: 50%;
+}
+
+.content {
+  flex: 1 0 auto;
+  margin: 0 auto;
+  max-width: 800px;
+  width: 90%;
+  margin-bottom: 2em;
+}
+
+.content li {
+  line-height: 1.4em;
+  text-align: left;
+}
+
+.content p {
+  line-height: 1.4em;
+  text-align: justify;
+}
+
+.content img {
+  margin: 0 auto;
+  width: 100%;
+  margin: 1em 0;
+}
+
+footer {
+  background-color: var(--hover-background);
+  color: var(--unemph-color);
+  text-align: center;
+  width: 100%;
+  margin: 1em auto 0 auto;
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+
+/* Hidden dialog styles */
+#dialog {
+  max-width: 400px;
+  display: none;
+  position: fixed;
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+#dialog input {
+  display: block;
+  margin-bottom: 10px;
+  width: 100%;
+}
+#dialog button {
+  margin-top: 10px;
+}
+
+/* Custom SimpleMDE styling */
+.CodeMirror {
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 1.2em;
+  font-family: monospace;
+  text-align: left;
+}
+
+.editor-preview {
+  font-size: 1em;
+  font-family: sans-serif;
+}

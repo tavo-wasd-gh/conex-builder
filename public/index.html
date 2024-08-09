@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title>Builder | CONEX.one </title>
+    <link rel="canonical" href="https://builder.conex.one">
+    <link rel='stylesheet' type='text/css' href='/style.css'>
+    <link rel="icon" href="favicon.png">
+    <meta name="description" content="Constructor de sitios web de CONEX.one">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="index, follow">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/css/simplemde.min.css">
+    <link rel="stylesheet" href="/static/css/simplemde-dark.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+  </head>
+  <form action="submit.php" method="post">
+    <div class="banner" style="background-image: url(/static/banner.jpg);">
+      <div class="desc">
+        <input type="text" name="title" class="input-title" placeholder="[Nombre Ejemplo]">
+        <input type="text" name="slogan" class="input-slogan" placeholder="[Slogan llamativo o breve descripción]">
+        <button type="button" id="openDialogButton">Solicitar sitio web</button>
+      </div>
+    </div>
+    <body>
+      <div id="content" class="content">
+        <div id="editor-container">
+          <textarea id="editor" name="editor" lang="es"></textarea>
+        </div>
+      </div>
+    </body>
+    <div id="dialog">
+      <h2>Ingrese sus detalles</h2>
+      <p>Utilizaremos esta información para contactarle acerca de la publicación del sitio.</p>
+      <input type="text" id="name" name="name" placeholder="Nombre completo" required>
+      <input type="tel" id="phone" name="phone" placeholder="Número de teléfono" required>
+      <input type="email" id="email" name="email" placeholder="Correo electrónico" required>
+      <button id="submitDialogButton">Enviar solicitud</button>
+      <button id="cancelDialogButton">Cancelar</button>
+    </div>
+  </form>
+  <script src="/static/js/simplemde.min.js"></script>
+  <script>
+    var simplemde = new SimpleMDE({
+      element: document.getElementById("editor"),
+      toolbar: ["preview", "|", "heading", "bold", "italic", "unordered-list", "ordered-list", "|", "link", "image", "table"],
+      spellChecker: false,
+    });
+    simplemde.value("# Bienvenido a [Empresa]\n\nUbicados en [Dirección de la Empresa]\n\n✉️ contacto@empresa.com\n☎️ +506 8888 8888\n\n# Servicios\n\n| Servicio | Descripción | Monto     |\n| -------- | ----------- | --------- |\n| Uno      | Una         |  1.000,00 |\n| Dos      | Breve       | 10.000,00 |\n| Tres     | Explicación |  7.500,00 |\n\n![Imagen ejemplo](https://0x0.st/XWHZ.jpg)\n\n# Acerca de Nosotros\n\nEn [Empresa], nos especializamos en [breve descripción de tus servicios/productos]. Nuestro equipo está dedicado a ofrecer [propuesta de valor o punto de venta único].\n\n# Síguenos\n\n[Facebook](https://facebook.com) | [Instagram](https://instagram.com)\n");
+    document.getElementById('openDialogButton').addEventListener('click', () => {
+      document.getElementById('dialog').style.display = 'block';
+    });
+  </script>
+  <script src="/form.js"></script>
+</html>
