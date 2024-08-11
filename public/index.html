@@ -12,8 +12,10 @@
     <link rel="stylesheet" href="/static/css/simplemde.min.css">
     <link rel="stylesheet" href="/static/css/simplemde-dark.min.css">
     <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/simplemde.min.js"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
   </head>
-  <form action="submit.php" method="post">
+  <form action="submit.php" id="mainForm" method="post">
     <div class="banner" style="background-image: url(/static/banner.jpg);">
       <div class="desc">
         <input type="text" name="title" class="input-title" placeholder="[Nombre Ejemplo]">
@@ -28,17 +30,20 @@
         </div>
       </div>
     </body>
+    <div id="overlay"></div>
     <div id="dialog">
       <h2>Ingrese sus detalles</h2>
       <p>Utilizaremos esta información para contactarle acerca de la publicación del sitio.</p>
+      <div id="error-message"><p>Por favor digite los campos requeridos.</p></div>
+      <div id="error-with-payment"></div>
       <input type="text" id="name" name="name" placeholder="Nombre completo" required>
       <input type="tel" id="phone" name="phone" placeholder="Número de teléfono" required>
       <input type="email" id="email" name="email" placeholder="Correo electrónico" required>
-      <button id="submitDialogButton">Enviar solicitud</button>
-      <button id="cancelDialogButton">Cancelar</button>
+      <div id="paypal-button-container"></div>
+      <button id="submitDialogButton" class="button-pay" type="button">$20 al año</button>
+      <button id="cancelDialogButton" type="button">Cancelar</button>
     </div>
   </form>
-  <script src="/static/js/simplemde.min.js"></script>
   <script>
     var simplemde = new SimpleMDE({
       element: document.getElementById("editor"),

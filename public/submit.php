@@ -16,6 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = isset($_POST["name"]) ? $_POST["name"] : "";
     $email = isset($_POST["email"]) ? $_POST["email"] : "";
     $phone = isset($_POST["phone"]) ? $_POST["phone"] : "";
+    $phone = isset($_POST["paypalOrderID"]) ? $_POST["paypalOrderID"] : "";
 
     $editorContent = isset($_POST["editor"]) ? $_POST["editor"] : "";
     $editorContent = str_replace("\r\n", "\n", $editorContent); // Convert CRLF to LF
@@ -25,6 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ---
 date: $isoDate
 author: "$name <$email> <$phone>"
+orderID: $paypalOrderID
 title: "$title"
 description: "$slogan"
 layout: single
