@@ -126,33 +126,31 @@ footer {
   padding-bottom: 1em;
 }
 
-/* Hidden dialog styles */
 #dialog {
-  text-align: left;
-  max-width: 400px;
+  width: 25em;
+  max-width: var(--page-width);
   display: none;
   position: fixed;
-  top: 15%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  padding: 20px;
-  background: white;
-  border: 1px solid #ccc;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding: 1.5em;
+  background: var(--background-color);
+  border: 1px solid var(--hover-border);
+  box-shadow: 0 0 3em rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  border-radius: 10px;
+  text-align: left;
 }
 
-#dialog h2 {
+#dialog h2, #dialog p {
   margin: 0;
-  padding: 0;
+  padding: 0 0 0.5em 0;
 }
 
-#dialog input {
-  display: block;
-  margin-bottom: 10px;
-  width: 100%;
-}
 #dialog button {
-  margin-top: 10px;
+  margin: 0.5em 0.5em 0 0;
+  padding: 1em;
 }
 
 #overlay {
@@ -166,22 +164,9 @@ footer {
   z-index: 999;
 }
 
-#dialog {
-  width: 20em;
-  max-width: var(--page-width);
-  display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 1.5em;
-  background: var(--background-color);
-  border: 1px solid var(--hover-border);
-  box-shadow: 0 0 3em rgba(0, 0, 0, 0.4);
-  z-index: 1000;
-}
-
 #dialog input {
+  border-radius: 10px;
+  text-align: left;
   font-size: 1em;
   display: block;
   width: 90%;
@@ -218,15 +203,20 @@ button {
 
 #dialog .button-pay{
   border: 0px solid #000;
-  background: #0070ba;
+  background: #008645;
   font-weight: bold;
   color: white;
 }
 
 #dialog .button-pay:hover {
-  background: #0066aa;
+  background: #006d38;
   font-weight: bold;
   color: white;
+}
+
+#paypal-button-container {
+  display: none;
+  padding: 0.5em 0;
 }
 
 #openDialogButton {
