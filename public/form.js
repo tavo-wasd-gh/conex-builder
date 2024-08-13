@@ -4,6 +4,8 @@
 //    https://developer.paypal.com/integration-builder/ instead
 //    to use components=buttons only. Or, Try to load both,
 //    components=buttons,hosted-buttons etc.
+//    See Buttons SDK Reference
+//    https://developer.paypal.com/sdk/js/reference/
 //
 // 2. Try to disable asking for shipping info (although could be
 //    useful to mark as sent).
