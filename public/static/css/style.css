@@ -141,6 +141,8 @@ footer {
   z-index: 1000;
   border-radius: 10px;
   text-align: left;
+  overflow: auto;
+  max-height: 80vh;
 }
 
 #dialog h2, #dialog p {
@@ -201,24 +203,6 @@ button {
   color: var(--color);
 }
 
-#dialog .button-pay{
-  border: 0px solid #000;
-  background: #008645;
-  font-weight: bold;
-  color: white;
-}
-
-#dialog .button-pay:hover {
-  background: #006d38;
-  font-weight: bold;
-  color: white;
-}
-
-#paypal-button-container {
-  display: none;
-  padding: 0.5em 0;
-}
-
 #openDialogButton {
   position: fixed;
   bottom: 2em;
@@ -239,6 +223,28 @@ button {
   width: fit-content;
   word-break: break-word;
   border: 0;
+}
+
+#method-button-container button {
+  background-color: #ccc;
+  border: none;
+  padding: 10px 20px;
+  margin: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#method-button-container button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+#paypal-button-container > div {
+  display: none;
+}
+
+#paypal-button-container > div.active {
+  display: block;
 }
 
 /* Custom SimpleMDE styling */

@@ -1,118 +1,99 @@
-function isFormValid(form) {
-  return form.checkValidity();
+// TODO
+//
+// 1. See if I can stop using hosted buttons and use
+//    https://developer.paypal.com/integration-builder/ instead
+//    to use components=buttons only. Or, Try to load both,
+//    components=buttons,hosted-buttons etc.
+//
+// 2. Try to disable asking for shipping info (although could be
+//    useful to mark as sent).
+//
+// 3. Read about IPN and Webhooks to automate registering process.
+
+const PayPalSdkOneTime = "";
+const PayPalSdkSub = "";
+const clientId = "";
+const OneTimePID = "";
+const PlanID = "";
+
+function loadScript(url, callback) {
+    const script = document.createElement('script');
+    script.src = url;
+    script.onload = callback;
+    script.onerror = () => {
+        console.error(`Script load error: ${url}`);
+    };
+    document.head.appendChild(script);
 }
 
-function removePayPalElement() {
-  const element = document.getElementById('paypal-button-container');
-  element.innerHTML = '';
-  element.style.display = 'none';
+function loadPayPalSDK(url, callback) {
+    loadScript(url, callback);
 }
 
 function hideDialog() {
-  document.getElementById('overlay').style.display = 'none';
-  document.getElementById('dialog').style.display = 'none';
-  document.getElementById('openDialogButton').style.display = 'block';
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('dialog').style.display = 'none';
+    document.getElementById('openDialogButton').style.display = 'block';
 }
 
-function renderPaypalElement() {
-  const element = document.getElementById('paypal-button-container');
-  element.innerHTML = '';
-  element.style.display = 'block';
+function showDialog() {
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('dialog').style.display = 'block';
+    document.getElementById('openDialogButton').style.display = 'none';
+}
 
-  paypal.Buttons({
-    style: {color: 'blue', shape: 'pill', label: 'pay', height: 40},
+function togglePaymentMethod(selectedButtonId) {
+    // Deselect all buttons and hide all PayPal buttons
+    document.querySelectorAll('#method-button-container button').forEach(button => {
+        button.classList.remove('active');
+    });
+    document.querySelectorAll('#paypal-button-container > div').forEach(div => {
+        div.classList.remove('active');
+    });
 
-    // Call your server to set up the transaction
-    createOrder: function(data, actions) {
-      return fetch('/demo/checkout/api/paypal/order/create/', {
-        method: 'post'
-      }).then(function(res) {
-        return res.json();
-      }).then(function(orderData) {
-        return orderData.id;
-      });
-    },
+    // Select the clicked button and show the corresponding PayPal button
+    const selectedButton = document.getElementById(selectedButtonId);
+    selectedButton.classList.add('active');
 
-    // Call your server to finalize the transaction
-    onApprove: function(data, actions) {
-      return fetch('/demo/checkout/api/paypal/order/' + data.orderID + '/capture/', {
-        method: 'post'
-      }).then(function(res) {
-        return res.json();
-      }).then(function(orderData) {
-        var errorDetail = Array.isArray(orderData.details) && orderData.details[0];
-
-        //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
-        if (errorDetail && errorDetail.issue === 'INSTRUMENT_DECLINED') {
-          return actions.restart();
-        }
-
-        //   (2) Other non-recoverable errors -> Show a failure message
-        if (errorDetail) {
-          var msg = 'Sorry, your transaction could not be processed.';
-          if (errorDetail.description) msg += '\n\n' + errorDetail.description;
-          if (orderData.debug_id) msg += ' (' + orderData.debug_id + ')';
-          return alert(msg); // TODO show a prettier message
-        }
-
-        //   (3) Successful transaction -> Show confirmation or thank you
-        // Grab transaction.status and transaction.id, call up php and save it in db.
-        // var transaction = orderData.purchase_units[0].payments.captures[0];
-        // alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
-
-        // Replace the above to show a success message within this page, e.g.
-        element.innerHTML = '';
-        element.innerHTML = '<h3>Thank you for your payment!</h3>';
-        document.getElementById('mainForm').submit();
-      });
+    if (selectedButtonId === 'showOneTimeButton') {
+        document.getElementById('paypal-button-container').classList.add('active');
+        document.getElementById('paypalOneTimeButton').classList.add('active');
+        loadPayPalSDK(PayPalSdkOneTime, () => {
+            paypal.HostedButtons({
+                hostedButtonId: OneTimePID,
+            }).render("#paypalOneTimeButton");
+        });
+    } else if (selectedButtonId === 'showSubButton') {
+        document.getElementById('paypal-button-container').classList.add('active');
+        document.getElementById('paypalSubButton').classList.add('active');
+        loadPayPalSDK(PayPalSdkSub, () => {
+            paypal.Buttons({
+                style: { shape: 'pill', color: 'black', layout: 'vertical', label: 'subscribe' },
+                createSubscription: function(data, actions) {
+                    return actions.subscription.create({
+                        plan_id: PlanID
+                    });
+                },
+                onApprove: function(data, actions) {
+                    alert(data.subscriptionID); // You can add optional success message for the subscriber here
+                }
+            }).render('#paypalSubButton'); // Renders the PayPal button
+        });
     }
-  }).render('#paypal-button-container');
 }
 
-document.getElementById('openDialogButton').addEventListener('click', () => {
-  document.getElementById('overlay').style.display = 'block';
-  document.getElementById('dialog').style.display = 'block';
-  document.getElementById('openDialogButton').style.display = 'none';
+document.getElementById('showOneTimeButton').addEventListener('click', function() {
+    togglePaymentMethod('showOneTimeButton');
 });
 
-document.getElementById('submitDialogButton').addEventListener('click', () => {
-  const form = document.getElementById('mainForm');
+document.getElementById('showSubButton').addEventListener('click', function() {
+    togglePaymentMethod('showSubButton');
+});
 
-  ['name', 'email', 'phone'].forEach(id => {
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = id;
-    input.value = document.getElementById(id).value;
-    form.appendChild(input);
-  });
-
-  if (isFormValid(form)) {
-    document.getElementById('submitDialogButton').style.display = 'none';
-    document.getElementById('error-message').style.display = 'none';
-    renderPaypalElement();
-  } else {
-    document.getElementById('submitDialogButton').style.display = 'inline';
-    document.getElementById('error-message').style.display = 'block';
-    removePayPalElement();
-  }
-
-  // const orderIDInput = document.createElement('input');
-  // orderIDInput.type = 'hidden';
-  // orderIDInput.name = 'paypalOrderID';
-  // orderIDInput.value = paypalOrderID;
-  // form.appendChild(orderIDInput);
-  // form.submit();
+document.getElementById('openDialogButton').addEventListener('click', () => {
+    showDialog();
 });
 
 document.getElementById('cancelDialogButton').addEventListener('click', () => {
-  hideDialog();
-});
-
-document.addEventListener('click', (event) => {
-  const dialog = document.getElementById('dialog');
-  const openDialogButton = document.getElementById('openDialogButton');
-  // If the click is outside the dialog and not on the openDialogButton, hide the dialog
-  if (!dialog.contains(event.target) && !openDialogButton.contains(event.target)) {
     hideDialog();
-  }
 });
