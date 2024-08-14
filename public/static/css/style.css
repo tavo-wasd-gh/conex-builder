@@ -127,8 +127,8 @@ footer {
 }
 
 #dialog {
-  width: 25em;
-  max-width: var(--page-width);
+  width: 85%;
+  max-width: 30em;
   display: none;
   position: fixed;
   top: 50%;
@@ -142,7 +142,7 @@ footer {
   border-radius: 10px;
   text-align: left;
   overflow: auto;
-  max-height: 80vh;
+  max-height: 70vh;
 }
 
 #dialog h2, #dialog p {
@@ -167,7 +167,6 @@ footer {
 }
 
 #dialog input {
-  border-radius: 10px;
   text-align: left;
   font-size: 1em;
   display: block;
@@ -225,13 +224,17 @@ button {
   border: 0;
 }
 
+#method-button-container {
+  display: flex;
+  justify-content: center;
+  margin: 1em 0;
+}
+
 #method-button-container button {
-  background-color: #ccc;
-  border: none;
-  padding: 10px 20px;
-  margin: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  transition: 0.3s;
+  background-color: var(--background);
+  border: 1px solid var(--hover-border);
+  color: var(--unemph-color);
 }
 
 #method-button-container button.active {
@@ -240,6 +243,7 @@ button {
 }
 
 #paypal-button-container > div {
+  margin: 1.5em 0 0 0;
   display: none;
 }
 

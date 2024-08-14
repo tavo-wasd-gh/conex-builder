@@ -18,18 +18,39 @@ const clientId = "";
 const OneTimePID = "";
 const PlanID = "";
 
-function loadScript(url, callback) {
-    const script = document.createElement('script');
-    script.src = url;
-    script.onload = callback;
-    script.onerror = () => {
-        console.error(`Script load error: ${url}`);
-    };
-    document.head.appendChild(script);
+loadOneTimeButton().then(() => {loadSubButton()})
+
+function loadOneTimeButton() {
+    return new Promise((resolve, reject) => {
+        var script = document.createElement('script');
+        script.src = PayPalSdkOneTime;
+        script.onload = function() {
+            paypal.HostedButtons({
+                hostedButtonId: OneTimePID,
+            }).render("#paypalOneTimeButton");
+        };
+        document.head.appendChild(script);
+        resolve();
+    });
 }
 
-function loadPayPalSDK(url, callback) {
-    loadScript(url, callback);
+function loadSubButton() {
+    var script = document.createElement('script');
+    script.src = PayPalSdkSub;
+    script.onload = function() {
+        paypal.Buttons({
+            style: { shape: 'pill', color: 'black', layout: 'vertical', label: 'subscribe' },
+            createSubscription: function(data, actions) {
+                return actions.subscription.create({
+                    plan_id: PlanID
+                });
+            },
+            onApprove: function(data, actions) {
+                alert(data.subscriptionID); // You can add optional success message for the subscriber here
+            }
+        }).render('#paypalSubButton');
+    };
+    document.head.appendChild(script);
 }
 
 function hideDialog() {
@@ -60,27 +81,9 @@ function togglePaymentMethod(selectedButtonId) {
     if (selectedButtonId === 'showOneTimeButton') {
         document.getElementById('paypal-button-container').classList.add('active');
         document.getElementById('paypalOneTimeButton').classList.add('active');
-        loadPayPalSDK(PayPalSdkOneTime, () => {
-            paypal.HostedButtons({
-                hostedButtonId: OneTimePID,
-            }).render("#paypalOneTimeButton");
-        });
     } else if (selectedButtonId === 'showSubButton') {
         document.getElementById('paypal-button-container').classList.add('active');
         document.getElementById('paypalSubButton').classList.add('active');
-        loadPayPalSDK(PayPalSdkSub, () => {
-            paypal.Buttons({
-                style: { shape: 'pill', color: 'black', layout: 'vertical', label: 'subscribe' },
-                createSubscription: function(data, actions) {
-                    return actions.subscription.create({
-                        plan_id: PlanID
-                    });
-                },
-                onApprove: function(data, actions) {
-                    alert(data.subscriptionID); // You can add optional success message for the subscriber here
-                }
-            }).render('#paypalSubButton'); // Renders the PayPal button
-        });
     }
 }
 
