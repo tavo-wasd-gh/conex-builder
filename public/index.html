@@ -9,46 +9,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="index, follow">
     <meta charset="utf-8">
-    <link rel="stylesheet" href="/static/css/simplemde.min.css">
-    <link rel="stylesheet" href="/static/css/simplemde-dark.min.css">
     <link rel="stylesheet" href="/static/css/style.css">
-    <script src="/static/js/simplemde.min.js"></script>
+    <!-- <link rel="stylesheet" href="/static/css/simplemde.min.css"> -->
+    <!-- <link rel="stylesheet" href="/static/css/simplemde-dark.min.css"> -->
+    <!-- <script src="/static/js/simplemde.min.js"></script> -->
+    <!-- EDITORJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script><!-- Header -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/simple-image@latest"></script><!-- Image -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script><!-- List -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script><!-- Quote -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script><!-- Code -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script><!-- Embed -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script><!-- Table -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script><!-- Link -->
+    <!-- Load Editor.js's Core -->
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+    <!-- EDITORJS -->
+    <script
+        src="https://www.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&disable-funding=venmo&currency=USD"
+      data-namespace="paypal_onetime"
+        ></script>
+    <script
+      src="https://www.paypal.com/sdk/js?client-id=AUJPUXq47cceshojipubmg0wvCgdJC-bg4O4xvMQf_ic1MzlS27OVW6EGpymJtFXssAiXNOwBQDKqWiE&vault=true&intent=subscription"
+      data-namespace="paypal_subscribe"
+        ></script>
   </head>
   <form action="submit.php" id="mainForm" method="post">
     <div class="banner" style="background-image: url(/static/banner.jpg);">
       <div class="desc">
         <input type="text" name="title" class="input-title" placeholder="[Nombre Ejemplo]">
         <input type="text" name="slogan" class="input-slogan" placeholder="[Slogan llamativo o breve descripción]">
-        <button type="button" id="openDialogButton">Solicitar sitio web</button>
+        <button type="button" id="openDialogButton">Solicitar por $20/año</button>
       </div>
     </div>
     <body>
+      <!-- <button type="button" id="saveButton">Salvar</button> -->
       <div id="content" class="content">
-        <div id="editor-container">
-          <textarea id="editor" name="editor" lang="es"></textarea>
-        </div>
+        <div id="editorjs"></div>
       </div>
     </body>
     <div id="overlay"></div>
     <div id="dialog">
-      <h2>Información de Contacto</h2>
+      <div>
+        <h2>Información de Contacto</h2>
+        <button id="cancelDialogButton" type="button">x</button>
+      </div>
       <p>Utilizaremos esta información para contactarle acerca de la publicación del sitio.</p>
-      <div id="error-message"><p>Por favor digite los campos requeridos.</p></div>
-      <div id="error-with-payment"></div>
-      <input type="text" id="name" name="name" placeholder="Nombre" required>
-      <input type="email" id="email" name="email" placeholder="Correo electrónico" required>
-      <input type="tel" id="phone" name="phone" placeholder="Teléfono (Opcional)">
+      <div id="form-container">
+        <input type="text" id="name" name="name" placeholder="Nombre (Requerido)" required>
+        <input type="email" id="email" name="email" placeholder="Correo electrónico (Requerido)" required>
+        <input type="tel" id="phone" name="phone" placeholder="Teléfono (Opcional)">
+      </div>
+      <h2>Tipo de Pago</h2>
+      <div>
+        <p><strong>Pago Único:</strong> El pago debe realizarse manualmente un año después de contratar el servicio, le enviaremos notificaciones al correo electrónico recordando el pago.</p>
+        <p><strong>Pago Automático:</strong> Requiere cuenta de PayPal para rebajo automático, si no tiene una le pedirá configurar rápidamente los datos.</p>
+      </div>
+      <div id="warning-message"><p>Por favor digite los campos requeridos.</p></div>
       <div id="method-button-container">
         <button id="showOneTimeButton" type="button">Pago Único</button>
         <button id="showSubButton" type="button">Pago Automático</button>
-        <button id="cancelDialogButton" type="button">Cancelar</button>
       </div>
+      <div id="error-with-payment"></div>
       <div id="paypal-button-container">
         <div id="paypalOneTimeButton"></div>
         <div id="paypalSubButton"></div>
       </div>
     </div>
   </form>
-  <script src="/static/js/simplemde.config.js"></script>
+  <!-- <script src="/static/js/simplemde.config.js"></script> -->
   <script src="/form.js"></script>
+  <script src="/static/js/config.editor.js"></script>
 </html>

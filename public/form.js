@@ -1,57 +1,23 @@
 // TODO
 //
-// 1. See if I can stop using hosted buttons and use
-//    https://developer.paypal.com/integration-builder/ instead
-//    to use components=buttons only. Or, Try to load both,
-//    components=buttons,hosted-buttons etc.
-//    See Buttons SDK Reference
-//    https://developer.paypal.com/sdk/js/reference/
-//
-// 2. Try to disable asking for shipping info (although could be
+// 1. Try to disable asking for shipping info (although could be
 //    useful to mark as sent).
 //
-// 3. Read about IPN and Webhooks to automate registering process.
+// 2. Read about IPN and Webhooks to automate registering process.
 
-const PayPalSdkOneTime = "";
-const PayPalSdkSub = "";
 const clientId = "";
 const OneTimePID = "";
 const PlanID = "";
 
-loadOneTimeButton().then(() => {loadSubButton()})
+const form = document.getElementById('mainForm');
 
-function loadOneTimeButton() {
-    return new Promise((resolve, reject) => {
-        var script = document.createElement('script');
-        script.src = PayPalSdkOneTime;
-        script.onload = function() {
-            paypal.HostedButtons({
-                hostedButtonId: OneTimePID,
-            }).render("#paypalOneTimeButton");
-        };
-        document.head.appendChild(script);
-        resolve();
-    });
-}
-
-function loadSubButton() {
-    var script = document.createElement('script');
-    script.src = PayPalSdkSub;
-    script.onload = function() {
-        paypal.Buttons({
-            style: { shape: 'pill', color: 'black', layout: 'vertical', label: 'subscribe' },
-            createSubscription: function(data, actions) {
-                return actions.subscription.create({
-                    plan_id: PlanID
-                });
-            },
-            onApprove: function(data, actions) {
-                alert(data.subscriptionID); // You can add optional success message for the subscriber here
-            }
-        }).render('#paypalSubButton');
-    };
-    document.head.appendChild(script);
-}
+['name', 'email', 'phone'].forEach(id => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = id;
+    input.value = document.getElementById(id).value;
+    form.appendChild(input);
+});
 
 function hideDialog() {
     document.getElementById('overlay').style.display = 'none';
@@ -87,12 +53,58 @@ function togglePaymentMethod(selectedButtonId) {
     }
 }
 
+function isFormValid(form) {
+  return form.checkValidity();
+}
+
+paypal_onetime.Buttons({
+    style: { shape: 'pill', color: 'black', layout: 'vertical', label: 'pay' },
+    createOrder: function(data, actions) {
+        return actions.order.create({
+            intent: 'CAPTURE',
+            purchase_units: [{
+                amount: {
+                    currency_code: 'USD',
+                    value: '20.00'
+                }
+            }]
+        });
+    },
+    onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+            alert('Transaction completed by ' + details.payer.name.given_name);
+        });
+    }
+}).render("#paypalOneTimeButton");
+
+paypal_subscribe.Buttons({
+    style: { shape: 'pill', color: 'black', layout: 'vertical', label: 'subscribe' },
+    createSubscription: function(data, actions) {
+        return actions.subscription.create({
+            plan_id: PlanID
+        });
+    },
+    onApprove: function(data, actions) {
+        alert(data.subscriptionID); // You can add optional success message for the subscriber here
+    }
+}).render('#paypalSubButton');
+
 document.getElementById('showOneTimeButton').addEventListener('click', function() {
+  if (isFormValid(form)) {
+    document.getElementById('warning-message').style.display = 'none';
     togglePaymentMethod('showOneTimeButton');
+  } else {
+    document.getElementById('warning-message').style.display = 'block';
+  }
 });
 
 document.getElementById('showSubButton').addEventListener('click', function() {
+  if (isFormValid(form)) {
+    document.getElementById('warning-message').style.display = 'none';
     togglePaymentMethod('showSubButton');
+  } else {
+    document.getElementById('warning-message').style.display = 'block';
+  }
 });
 
 document.getElementById('openDialogButton').addEventListener('click', () => {
