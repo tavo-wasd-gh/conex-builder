@@ -1,11 +1,16 @@
 BIN = builder
 SRC = main.go
+GOFILES = go.sum go.mod
 GOMODS = github.com/joho/godotenv
 
 all: ${BIN}
 
-${BIN}: ${SRC}
+${BIN}: ${SRC} ${GOFILES}
 	go build -o $@
+
+${GOFILES}:
+	go mod init ${BIN}
+	go get ${GOMODS}
 
 run: ${BIN}
 	@./$< &
@@ -15,9 +20,7 @@ stop:
 
 restart: stop run
 
-bootstrap:
-	go mod init ${BIN}
-	go get ${GOMODS}
+clean-all: clean clean-mods
 
 clean:
 	rm -f ${BIN}
