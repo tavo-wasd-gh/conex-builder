@@ -26,20 +26,23 @@
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
     <!-- EDITORJS -->
     <script
-        src="https://www.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&disable-funding=venmo&currency=USD"
-      data-namespace="paypal_onetime"
+      src="https://www.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&enable-funding=card&disable-funding=paylater,venmo"
+      data-namespace="paypal_order"
         ></script>
-    <script
-      src="https://www.paypal.com/sdk/js?client-id=AUJPUXq47cceshojipubmg0wvCgdJC-bg4O4xvMQf_ic1MzlS27OVW6EGpymJtFXssAiXNOwBQDKqWiE&vault=true&intent=subscription"
-      data-namespace="paypal_subscribe"
-        ></script>
+    <!-- <script -->
+    <!--   src="" -->
+    <!--   data-namespace="paypal_subscribe" -->
+    <!--     ></script> -->
   </head>
   <form action="submit.php" id="mainForm" method="post">
     <div class="banner" style="background-image: url(/static/banner.jpg);">
       <div class="desc">
         <input type="text" name="title" class="input-title" placeholder="[Nombre Ejemplo]">
         <input type="text" name="slogan" class="input-slogan" placeholder="[Slogan llamativo o breve descripción]">
-        <button type="button" id="openDialogButton">Solicitar por $20/año</button>
+        <button type="button" id="openDialogButton">
+          <img src="/static/svg/cart.svg">
+          <span >$20/año</span>
+        </button>
       </div>
     </div>
     <body>
@@ -52,7 +55,12 @@
     <div id="dialog">
       <div>
         <h2>Información de Contacto</h2>
-        <button id="cancelDialogButton" type="button">x</button>
+        <button id="cancelDialogButton" type="button">
+          <picture>
+            <source srcset="/static/svg/xd.svg" media="(prefers-color-scheme: dark)">
+            <img src="/static/svg/x.svg" style="width: 0.7em; height: 0.7em;" alt="Close" id="closeIcon">
+          </picture>
+        </button>
       </div>
       <p>Utilizaremos esta información para contactarle acerca de la publicación del sitio.</p>
       <div id="form-container">
@@ -66,14 +74,15 @@
         <p><strong>Pago Automático:</strong> Requiere cuenta de PayPal para rebajo automático, si no tiene una le pedirá configurar rápidamente los datos.</p>
       </div>
       <div id="warning-message"><p>Por favor digite los campos requeridos.</p></div>
-      <div id="method-button-container">
-        <button id="showOneTimeButton" type="button">Pago Único</button>
-        <button id="showSubButton" type="button">Pago Automático</button>
-      </div>
       <div id="error-with-payment"></div>
-      <div id="paypal-button-container">
-        <div id="paypalOneTimeButton"></div>
-        <div id="paypalSubButton"></div>
+      <div id="checkout">
+        <div id="method-button-container">
+          <button id="showOneTimeButton" type="button">Pago Único</button>
+          <button id="showSubButton" type="button">Pago Automático</button>
+        </div>
+        <div id="paypal-button-container">
+          <div id="paypal-button-container-order"></div>
+        </div>
       </div>
     </div>
   </form>

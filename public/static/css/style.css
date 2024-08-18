@@ -25,6 +25,9 @@
     --hover-border: #505050;
     --hyper-color: #00b4db;
   }
+  #closeIcon {
+    content: url('/static/svg/xd.svg');
+  }
 }
 
 @media (max-width: 900px) {
@@ -208,6 +211,8 @@ button {
 }
 
 #openDialogButton {
+  display: flex;
+  align-items: center;
   position: fixed;
   bottom: 2em;
   right: 1em;
@@ -273,6 +278,19 @@ button {
   font-size: 1.1em;
 }
 
+#checkout {
+}
+
+#openDialogButton img {
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: middle;
+}
+
+#openDialogButton span {
+  margin-left: 0.6em;
+}
+
 /* Custom SimpleMDE styling */
 .CodeMirror {
   border-radius: 10px;
@@ -286,5 +304,3 @@ button {
   font-size: 1em;
   font-family: sans-serif;
 }
-
-

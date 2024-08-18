@@ -71,9 +71,9 @@ var editor = new EditorJS({
         type : 'list',
         data : {
           items : [
-            'It is a block-styled editor',
-            'It returns clean data output in JSON',
-            'Designed to be extendable and pluggable with a simple API',
+            'Resolvemos una necesidad clave de mercado',
+            'Inversión en crecimiento con presupuesto sostenible.',
+            'Enfoque en satisfacción del cliente',
           ],
           style: 'unordered'
         }
@@ -82,9 +82,9 @@ var editor = new EditorJS({
         type: 'table',
         data: {
           content: [
-            ['Header 1', 'Header 2', 'Header 3'],
-            ['Row 1, Cell 1', 'Row 1, Cell 2', 'Row 1, Cell 3'],
-            ['Row 2, Cell 1', 'Row 2, Cell 2', 'Row 2, Cell 3']
+            ['Servicios', 'Descripción', 'Costo'],
+            ['Impresión', 'Breve descripción', '1000'],
+            ['laminado', 'Breve descripción', '2000'],
           ]
         }
       },
