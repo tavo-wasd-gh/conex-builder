@@ -29,10 +29,10 @@
       src="https://www.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&enable-funding=card&disable-funding=paylater,venmo"
       data-namespace="paypal_order"
         ></script>
-    <!-- <script -->
-    <!--   src="" -->
-    <!--   data-namespace="paypal_subscribe" -->
-    <!--     ></script> -->
+    <script
+      src="https://www.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&vault=true&intent=subscription&enable-funding=card&disable-funding=paylater"
+      data-namespace="paypal_subscribe"
+        ></script>
   </head>
   <form action="submit.php" id="mainForm" method="post">
     <div class="banner" style="background-image: url(/static/banner.jpg);">
@@ -82,6 +82,7 @@
         </div>
         <div id="paypal-button-container">
           <div id="paypal-button-container-order"></div>
+          <div id="paypal-button-container-subscribe"></div>
         </div>
       </div>
     </div>
