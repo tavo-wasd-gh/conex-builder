@@ -12,13 +12,13 @@ ${GOFILES}:
 	go mod init ${BIN}
 	go get ${GOMODS}
 
-run: ${BIN}
+start: ${BIN}
 	@./$< &
 
 stop:
 	-@pkill -SIGTERM ${BIN} || true
 
-restart: stop run
+restart: stop start
 
 clean-all: clean clean-mods
 
