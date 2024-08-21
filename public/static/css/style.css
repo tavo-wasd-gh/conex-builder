@@ -35,6 +35,9 @@
     --page-width: 90%;
     --navbar-width: 50vh;
   }
+  .floating-button span {
+    display: none;
+  }
 }
 
 html {
@@ -210,30 +213,6 @@ button {
   color: var(--color);
 }
 
-#openDialogButton {
-  display: flex;
-  align-items: center;
-  position: fixed;
-  bottom: 2em;
-  right: 1em;
-  height: 2.5em;
-  cursor: pointer;
-  font-size: 1em;
-  z-index: 1001;
-  background: linear-gradient(135deg, #00336b, #0099c5);
-  border-radius: 999px;
-  box-shadow: #006994 0 10px 20px -10px;
-  box-sizing: border-box;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 1em;
-  font-weight: bold;
-  outline: 0 solid transparent;
-  padding: 8px 18px;
-  width: fit-content;
-  word-break: break-word;
-  border: 0;
-}
-
 #method-button-container {
   display: flex;
   justify-content: center;
@@ -278,29 +257,59 @@ button {
   font-size: 1.1em;
 }
 
-#checkout {
+.floating-buttons {
+  display: flex;
+  position: fixed;
+  flex-direction: row;
+  align-items: center;
+  bottom: 0.2em;
+  right: 0.5em;
+  gap: 0.4em;
+  z-index: 9999;
 }
 
-#openDialogButton img {
+.floating-button {
+  height: 2.5em;
+  cursor: pointer;
+  font-size: 1em;
+  z-index: 1001;
+  border-radius: 999px;
+  box-sizing: border-box;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1em;
+  font-weight: bold;
+  outline: 0 solid transparent;
+  padding: 8px 18px;
+  width: fit-content;
+  word-break: break-word;
+  border: 0;
+}
+
+.floating-button img {
   width: 1.2em;
   height: 1.2em;
   vertical-align: middle;
 }
 
-#openDialogButton span {
+.floating-button span {
   margin-left: 0.6em;
 }
 
-/* Custom SimpleMDE styling */
-.CodeMirror {
-  border-radius: 10px;
-  overflow: hidden;
-  font-size: 1.2em;
-  font-family: monospace;
-  text-align: left;
+.floating-button:hover {
+    background-color: #0056b3;
 }
 
-.editor-preview {
-  font-size: 1em;
-  font-family: sans-serif;
+#updateSiteButton {
+  background: linear-gradient(135deg, #214353, #4c9abf);
+  box-shadow: #0099c5 0 10px 20px -15px;
+}
+
+#deleteSiteButton {
+  background: linear-gradient(135deg, #5e2329, #bf4c58);
+  box-shadow: #e31300 0 10px 20px -15px;
+}
+
+#openDialogButton {
+  background: linear-gradient(135deg, #21532a, #4fc764);
+  box-shadow: #27d100 0 10px 20px -15px;
 }

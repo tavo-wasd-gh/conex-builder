@@ -1,12 +1,12 @@
 BIN = builder
 SRC = main.go
 GOFILES = go.sum go.mod
-GOMODS = github.com/joho/godotenv
+GOMODS = github.com/joho/godotenv github.com/lib/pq
 
 all: ${BIN}
 
 ${BIN}: ${SRC} ${GOFILES}
-	go build -o $@
+	go build -o builder
 
 ${GOFILES}:
 	go mod init ${BIN}

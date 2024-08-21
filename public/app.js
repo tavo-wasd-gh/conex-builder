@@ -1,81 +1,62 @@
-// TODO
-//
-// 1. Try to disable asking for shipping info (although could be
-//    useful to mark as sent).
-//
-// 2. Read about IPN and Webhooks to automate registering process.
+document.addEventListener("DOMContentLoaded", function() {
+    const dialog = document.getElementById("dialog");
+    const overlay = document.getElementById("overlay");
+    const menu = document.getElementById("floatingButtons");
 
-const clientId = "";
-const OneTimePID = "";
-const PlanID = "";
+    function openDialog() {
+        dialog.style.display = "block";
+        overlay.style.display = "block";
+        menu.style.display = "none";
+    }
 
-const form = document.getElementById('mainForm');
+    function closeDialog() {
+        dialog.style.display = "none";
+        overlay.style.display = "none";
+        menu.style.display = "block";
+    }
 
-['name', 'email', 'phone'].forEach(id => {
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = id;
-    input.value = document.getElementById(id).value;
-    form.appendChild(input);
+    function togglePaymentMethod(selectedButtonId) {
+        // Deselect all buttons and hide all PayPal buttons
+        document.querySelectorAll('#method-button-container button').forEach(button => { button.classList.remove('active'); });
+        document.querySelectorAll('#paypal-button-container > div').forEach(div => { div.classList.remove('active'); });
+
+        // Select the clicked button and show the corresponding PayPal button
+        const selectedButton = document.getElementById(selectedButtonId);
+        selectedButton.classList.add('active');
+
+        if (selectedButtonId === 'showOneTimeButton') {
+            document.getElementById('paypal-button-container').classList.add('active');
+            document.getElementById('paypal-button-container-order').classList.add('active');
+        } else if (selectedButtonId === 'showSubButton') {
+            document.getElementById('paypal-button-container').classList.add('active');
+            document.getElementById('paypal-button-container-subscribe').classList.add('active');
+        }
+    }
+
+    document.getElementById('showOneTimeButton').addEventListener('click', function() {
+        document.getElementById('warning-message').style.display = 'none';
+        togglePaymentMethod('showOneTimeButton');
+    });
+
+    document.getElementById('showSubButton').addEventListener('click', function() {
+        document.getElementById('warning-message').style.display = 'none';
+        togglePaymentMethod('showSubButton');
+    });
+
+    document.getElementById("openDialogButton").addEventListener("click", openDialog);
+    document.getElementById("cancelDialogButton").addEventListener("click", closeDialog);
 });
 
-function hideDialog() {
-    document.getElementById('overlay').style.display = 'none';
-    document.getElementById('dialog').style.display = 'none';
-    document.getElementById('openDialogButton').style.display = 'block';
-}
-
-function showDialog() {
-    document.getElementById('overlay').style.display = 'block';
-    document.getElementById('dialog').style.display = 'block';
-    document.getElementById('openDialogButton').style.display = 'none';
-}
-
-function togglePaymentMethod(selectedButtonId) {
-    // Deselect all buttons and hide all PayPal buttons
-    document.querySelectorAll('#method-button-container button').forEach(button => {
-        button.classList.remove('active');
-    });
-    document.querySelectorAll('#paypal-button-container > div').forEach(div => {
-        div.classList.remove('active');
-    });
-
-    // Select the clicked button and show the corresponding PayPal button
-    const selectedButton = document.getElementById(selectedButtonId);
-    selectedButton.classList.add('active');
-
-    if (selectedButtonId === 'showOneTimeButton') {
-        document.getElementById('paypal-button-container').classList.add('active');
-        document.getElementById('paypal-button-container-order').classList.add('active');
-    } else if (selectedButtonId === 'showSubButton') {
-        document.getElementById('paypal-button-container').classList.add('active');
-        document.getElementById('paypal-button-container-subscribe').classList.add('active');
-    }
-}
-
-function isFormValid(form) {
-  return form.checkValidity();
-}
 
 window.paypal_order.Buttons({
     style: { shape: 'pill', color: 'black', layout: 'vertical', label: 'pay' },
     async createOrder() {
         try {
-            const response = await fetch("/api/orders", {
+            const response = await fetch("/api/order", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                // use the "body" param to optionally pass additional order information
-                // like product ids and quantities
-                body: JSON.stringify({
-                    cart: [
-                        {
-                            id: "YOUR_PRODUCT_ID",
-                            quantity: "YOUR_PRODUCT_QUANTITY",
-                        },
-                    ],
-                }),
             });
 
             const orderData = await response.json();
@@ -97,11 +78,16 @@ window.paypal_order.Buttons({
     },
     async onApprove(data, actions) {
         try {
-            const response = await fetch(`/api/orders/${data.orderID}/capture`, {
+            const response = await fetch(`/api/order/${data.orderID}/capture`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
+                body: JSON.stringify(
+                    {
+                        directory: "tutorias",
+                    }
+                ),
             });
 
             const orderData = await response.json();
@@ -149,16 +135,24 @@ window.paypal_subscribe.Buttons({
     style: { shape: 'pill', color: 'black', layout: 'vertical', label: 'subscribe' },
     async createSubscription() {
         try {
-            const response = await fetch("/api/paypal/create-subscription", {
+            const response = await fetch("/api/paypal/subscribe", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ userAction: "SUBSCRIBE_NOW" }),
+                body: JSON.stringify(
+                  {
+                    // userAction: "SUBSCRIBE_NOW"
+                    directory: "testsite",
+                  }
+                ),
             });
             const data = await response.json();
             if (data?.id) {
-                resultMessage(`Successful subscription with ID ${data.id}...<br><br>`);
+                const approvalUrl = data.links.find(link => link.rel === "approve").href;
+                window.location.href = approvalUrl;
+                resultMessage(`Successful subscription with ID ${approvalUrl}...<br><br>`);
+                // resultMessage(`Successful subscription with ID ${data.id}...<br><br>`);
                 return data.id;
             } else {
                 console.error(
@@ -175,8 +169,6 @@ window.paypal_subscribe.Buttons({
                     { hideButtons: true },
                 );
             }
-            const approvalUrl = data.links.find(link => link.rel === "approve").href;
-            window.location.href = approvalUrl;
         } catch (error) {
             console.error(error);
             resultMessage(
@@ -201,35 +193,3 @@ window.paypal_subscribe.Buttons({
         }
     },
 }).render("#paypal-button-container-subscribe"); // Renders the PayPal button
-
-// Example function to show a result to the user. Your site's UI library can be used instead.
-function resultMessage(message) {
-  const container = document.querySelector("#checkout");
-  container.innerHTML = message;
-}
-
-document.getElementById('showOneTimeButton').addEventListener('click', function() {
-  if (isFormValid(form)) {
-    document.getElementById('warning-message').style.display = 'none';
-    togglePaymentMethod('showOneTimeButton');
-  } else {
-    document.getElementById('warning-message').style.display = 'block';
-  }
-});
-
-document.getElementById('showSubButton').addEventListener('click', function() {
-  if (isFormValid(form)) {
-    document.getElementById('warning-message').style.display = 'none';
-    togglePaymentMethod('showSubButton');
-  } else {
-    document.getElementById('warning-message').style.display = 'block';
-  }
-});
-
-document.getElementById('openDialogButton').addEventListener('click', () => {
-    showDialog();
-});
-
-document.getElementById('cancelDialogButton').addEventListener('click', () => {
-    hideDialog();
-});
