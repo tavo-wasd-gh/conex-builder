@@ -1,0 +1,195 @@
+#+TITLE: Conex Builder Documentation
+#+PROPERTY: header-args:sql :engine postgres :dbhost "localhost" :dbport 5432 :dbuser "conex" :dbpassword "1234" :database "iterone"
+
+* Database
+
+** Create DB
+
+#+begin_src sh
+sudo su - postgres
+psql
+#+end_src
+
+Then:
+
+#+BEGIN_SRC sql
+CREATE DATABASE iterone OWNER conex;
+#+END_SRC
+
+** Sites table
+
+#+BEGIN_SRC sql :results silent
+DROP TABLE IF EXISTS changes;
+DROP TABLE IF EXISTS payments;
+DROP TABLE IF EXISTS sites;
+
+CREATE TABLE sites (
+    id     SERIAL PRIMARY KEY,
+    folder VARCHAR(35) UNIQUE NOT NULL,
+    status VARCHAR(4),
+    due    TIMESTAMPTZ NOT NULL,
+    name   VARCHAR(50),
+    sur    VARCHAR(50),
+    email  VARCHAR(100) NOT NULL,
+    phone  VARCHAR(20),
+    code   VARCHAR(2)
+);
+#+END_SRC
+
+#+BEGIN_SRC sql :results silent
+INSERT INTO sites (folder, status, due, name, sur, email, phone, code)
+VALUES ('athos', 'up', '2025-08-31T20:26:58Z', 'John', 'Doe', 'john@doe', '8888-8888', 'CR');
+#+END_SRC
+
+#+BEGIN_SRC sql
+SELECT * FROM sites;
+#+END_SRC
+
+#+RESULTS:
+| id | folder    | status | due                    | name | sur | email                                 |      phone | code |
+|----+-----------+--------+------------------------+------+-----+---------------------------------------+------------+------|
+|  1 | athos     | up     | 2026-08-31 15:27:00-06 | John | Doe | sb-8kx8c32267916@personal.example.com | 5068031951 | CR   |
+|  2 | gofitness | up     | 2025-08-31 15:29:01-06 | John | Doe | sb-8kx8c32267916@personal.example.com | 5068031951 | CR   |
+
+** Payments table
+
+#+BEGIN_SRC sql :results silent
+DROP TABLE IF EXISTS changes;
+DROP TABLE IF EXISTS payments;
+
+CREATE TABLE payments (
+    id       SERIAL PRIMARY KEY,
+    capture  VARCHAR(100) NOT NULL,
+    site     INTEGER REFERENCES sites(id) NOT NULL,
+    amount   DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(3) NOT NULL,
+    status   VARCHAR(18) NOT NULL, -- PayPal capture status length -- https://developer.paypal.com/docs/api/orders/v2/#orders_capture
+    date     DATE NOT NULL
+);
+#+END_SRC
+
+#+BEGIN_SRC sql :results silent
+INSERT INTO payments (capture, site, amount, currency, date, status)
+VALUES ('5PS47268T4115691X', 1, 20.00, 'USD', '2024-08-30', 'COMPLETED');
+#+END_SRC
+
+#+BEGIN_SRC sql
+SELECT * FROM payments;
+#+END_SRC
+
+#+RESULTS:
+| id | capture           | site | amount | currency | status    |       date |
+|----+-------------------+------+--------+----------+-----------+------------|
+|  1 | 6H6838025H7236834 |    1 |  20.00 | USD      | COMPLETED | 2024-08-31 |
+|  2 | 48H30563GU472432N |    1 |  20.00 | USD      | COMPLETED | 2024-08-31 |
+|  3 | 3UD50608FD4050042 |    2 |  20.00 | USD      | COMPLETED | 2024-08-31 |
+
+** Changes table
+
+#+BEGIN_SRC sql :results silent
+DROP TABLE IF EXISTS changes;
+
+CREATE TABLE changes (
+    id      INTEGER PRIMARY KEY,
+    by      VARCHAR(20) NOT NULL,
+    site    INTEGER REFERENCES sites(id),
+    payment INTEGER REFERENCES payments(id),
+    col     VARCHAR(6) NOT NULL,
+    prev    VARCHAR(8) NOT NULL,
+    next    VARCHAR(8) NOT NULL,
+    date    DATE NOT NULL
+);
+#+END_SRC
+
+#+BEGIN_SRC sql
+SELECT * FROM changes;
+#+END_SRC
+
+#+RESULTS:
+| id | by | site | payment | col | prev | next | date |
+|----+----+------+---------+-----+------+------+------|
+
+** Types of changes
+
+*** Payments
+
+- status: complete/refunded/modified
+- amount: prev/next
+
+*** Sites
+
+- folder: prev/next
+- status: up/down
+- due: date/date
+- name: prev/next
+- sur: prev/next
+- email: prev/next
+- phone: prev/next
+- code: prev/next
+
+* Error codes
+
+** http.Error
+
+** Fatalf
+
+Fatal error will cause program shutdown by calling ~os.Exit(1)~.
+
+*** Error 000: Missing credentials
+
+*Package*: ~main~
+*Function*: ~init()~
+*Libraries*: ~os~, ~log~, ~github.com/joho/godotenv~
+
+Authentication and other parameters are located in the ~.env~ file which mist be
+located at the root of main binary execution.
+
+Possible causes for error are: 
+
+- Binary execution directory doesn't have the ~.env~ file
+- Missing parameters for initializing environment values
+- Corruption of ~.env~ file
+- Library error
+  
+Steps to troubleshoot:
+
+1. Check ~.env~ exists
+2. Check ~.env~ authentication values
+3. Check ~.env~ file integrity
+4. Update, rollback or troubleshoot library
+
+*** Error 001: Can't connect to database
+
+*Package*: ~main~
+*Function*: ~init()~
+*Libraries*: ~os~, ~log~
+
+The ~db~ object manages database queries. This object is used to ping the
+database, a correct ping depends on correctly set credentials, and properly
+initialized ~db~ object.
+
+Possible causes for error are: 
+
+- Wrong database credentials
+- Missing database credentials
+
+Steps to troubleshoot:
+
+1. Check set, correct and valid credentials in ~.env~ file
+
+*** Error: 002: Can't start server
+
+*Package*: ~main~
+*Function*: ~main()~
+*Libraries*: ~os~, ~log~, ~net/http~, ~os/signal~
+
+The server runs in a Goroutine, started on a port defined in ~.env~.
+
+Possible causes for error are: 
+
+- Port is in use
+- Port usage denied
+
+Steps to troubleshoot:
+
+1. Check set, correct and valid port in ~.env~ file

@@ -1,16 +1,17 @@
 BIN = builder
-SRC = main.go
-GOFILES = go.sum go.mod
+SRCDIR = server
+SRC = ${SRCDIR}/main.go
+GOFILES = ${SRCDIR}/go.sum ${SRCDIR}/go.mod
 GOMODS = github.com/joho/godotenv github.com/lib/pq
 
 all: ${BIN}
 
 ${BIN}: ${SRC} ${GOFILES}
-	go build -o builder
+	(cd ${SRCDIR} && go build -o ../${BIN})
 
 ${GOFILES}:
-	go mod init ${BIN}
-	go get ${GOMODS}
+	(cd ${SRCDIR} && go mod init ${BIN})
+	(cd ${SRCDIR} && go get ${GOMODS})
 
 start: ${BIN}
 	@./$< &
@@ -26,4 +27,4 @@ clean:
 	rm -f ${BIN}
 
 clean-mods:
-	rm -f go.*
+	rm -f ${SRCDIR}/go.*

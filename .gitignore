@@ -1,6 +1,2 @@
 builder
-bin
-go.mod
-go.sum
-public/submit/*
 .env
