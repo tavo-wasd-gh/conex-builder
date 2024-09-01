@@ -32,7 +32,8 @@ CREATE TABLE sites (
     sur    VARCHAR(50),
     email  VARCHAR(100) NOT NULL,
     phone  VARCHAR(20),
-    code   VARCHAR(2)
+    code   VARCHAR(2),
+    raw    JSONB NOT NULL
 );
 #+END_SRC
 
@@ -46,10 +47,9 @@ SELECT * FROM sites;
 #+END_SRC
 
 #+RESULTS:
-| id | folder    | status | due                    | name | sur | email                                 |      phone | code |
-|----+-----------+--------+------------------------+------+-----+---------------------------------------+------------+------|
-|  1 | athos     | up     | 2026-08-31 15:27:00-06 | John | Doe | sb-8kx8c32267916@personal.example.com | 5068031951 | CR   |
-|  2 | gofitness | up     | 2025-08-31 15:29:01-06 | John | Doe | sb-8kx8c32267916@personal.example.com | 5068031951 | CR   |
+| id | folder    | status | due                    | name | sur | email                                 |      phone | code | raw                                                                                                                                                                                                                       |
+|----+-----------+--------+------------------------+------+-----+---------------------------------------+------------+------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|  2 | gofitness | up     | 2025-09-01 00:18:06-06 | John | Doe | sb-8kx8c32267916@personal.example.com | 5068031951 | CR   | {"time": 1725171485533, "blocks": [{"id": "hLu8z-l1u5", "data": {"text": "asdfasfasdf", "level": 2}, "type": "header"}, {"id": "frc77fNxnu", "data": {"text": "asdfasfasdf"}, "type": "paragraph"}], "version": "2.30.5"} |
 
 ** Payments table
 
@@ -78,11 +78,8 @@ SELECT * FROM payments;
 #+END_SRC
 
 #+RESULTS:
-| id | capture           | site | amount | currency | status    |       date |
-|----+-------------------+------+--------+----------+-----------+------------|
-|  1 | 6H6838025H7236834 |    1 |  20.00 | USD      | COMPLETED | 2024-08-31 |
-|  2 | 48H30563GU472432N |    1 |  20.00 | USD      | COMPLETED | 2024-08-31 |
-|  3 | 3UD50608FD4050042 |    2 |  20.00 | USD      | COMPLETED | 2024-08-31 |
+| id | capture | site | amount | currency | status | date |
+|----+---------+------+--------+----------+--------+------|
 
 ** Changes table
 

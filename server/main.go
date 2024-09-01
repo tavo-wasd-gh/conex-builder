@@ -135,7 +135,7 @@ func Token() (string, error) {
 	return response.AccessToken, nil
 }
 
-func RegisterOrder(capture Capture, directory string) {
+func RegisterOrder(capture Capture, directory string, editorData json.RawMessage) {
 	var (
 		// Payment
 		id       string
@@ -158,7 +158,7 @@ func RegisterOrder(capture Capture, directory string) {
 	currency = capture.PurchaseUnits[0].Payments.Captures[0].Amount.CurrencyCode
 	pstatus = capture.PurchaseUnits[0].Payments.Captures[0].Status
 	date = capture.PurchaseUnits[0].Payments.Captures[0].CreateTime
-	wstatus = "up"
+	wstatus = "down"
 	due = date.AddDate(1, 0, 0)
 	name = capture.Payer.Name.GivenName
 	surname = capture.Payer.Name.Surname
@@ -172,11 +172,12 @@ func RegisterOrder(capture Capture, directory string) {
 
 	if newSite == sql.ErrNoRows {
 		if err := db.QueryRow(
-			`INSERT INTO sites (folder, status, due, name, sur, email, phone, code)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			`INSERT INTO sites (folder, status, due, name, sur, email, phone, code, raw)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 			RETURNING id`,
 			directory, wstatus, due,
-			name, surname, email, phone, country).Scan(&pkey); err != nil {
+			name, surname, email, phone, country,
+			editorData).Scan(&pkey); err != nil {
 			log.Printf("Error: Could not register site to database: %v", err)
 			return
 		}
@@ -295,7 +296,8 @@ func CaptureOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var cart struct {
-		Directory string `json:"directory"`
+		Directory  string          `json:"directory"`
+		EditorData json.RawMessage `json:"editor_data"`
 	}
 
 	err = json.Unmarshal(info, &cart)
@@ -305,7 +307,15 @@ func CaptureOrder(w http.ResponseWriter, r *http.Request) {
 			http.StatusBadRequest)
 		return
 	}
+
 	directory := cart.Directory
+	editorData := cart.EditorData
+	if err != nil {
+		http.Error(w,
+			"Failed to parse request body",
+			http.StatusBadRequest)
+		return
+	}
 
 	path := strings.TrimPrefix(r.URL.Path, "/api/orders/")
 	parts := strings.Split(path, "/")
@@ -374,7 +384,7 @@ func CaptureOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RegisterOrder(capture, directory)
+	RegisterOrder(capture, directory, editorData)
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(receipt); err != nil {

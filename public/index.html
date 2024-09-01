@@ -1,89 +1,36 @@
 <!DOCTYPE html>
-<html lang="es">
-  <head>
-    <title>Builder | CONEX.one </title>
-    <link rel="canonical" href="https://builder.conex.one">
-    <link rel='stylesheet' type='text/css' href='/static/css/style.css'>
-    <link rel="icon" href="favicon.png">
-    <meta name="description" content="Constructor de sitios web de CONEX.one">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="index, follow">
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <!-- EDITORJS -->
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script><!-- Header -->
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/simple-image@latest"></script><!-- Image -->
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script><!-- List -->
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script><!-- Quote -->
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script><!-- Code -->
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script><!-- Embed -->
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script><!-- Table -->
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script><!-- Link -->
-    <!-- Load Editor.js's Core -->
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
-    <!-- EDITORJS -->
-    <script
-      src="https://sandbox.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&enable-funding=card&disable-funding=paylater,venmo"
-      data-namespace="paypal_order"
-        ></script>
-    <script
-      src="https://sandbox.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&vault=true&intent=subscription&enable-funding=card&disable-funding=paylater"
-      data-namespace="paypal_subscribe"
-        ></script>
-  </head>
-  <div class="banner" style="background-image: url(/static/banner.jpg);">
-    <div class="desc">
-      <input type="text" id="title" name="title" class="input-title" placeholder="[Nombre Ejemplo]">
-      <input type="text" id="slogan" name="slogan" class="input-slogan" placeholder="[Slogan llamativo o breve descripción]">
-      <div class="floating-buttons" id="floatingButtons">
-        <button class="floating-button" id="openDialogButton">
-          <img src="/static/svg/cart.svg">
-          <span>$20/año</span>
-        </button>
-        <button class="floating-button" id="updateSiteButton">
-          <img src="/static/svg/edit.svg">
-          <span>Actualizar mi página</span>
-        </button>
-        <button class="floating-button" id="deleteSiteButton">
-          <img src="/static/svg/delete.svg">
-          <span>Eliminar página</span>
-        </button>
-      </div>
-    </div>
-  </div>
-  <body>
-    <div id="content" class="content">
-      <div id="editorjs"></div>
-    </div>
-  </body>
-  <div id="overlay"></div>
-  <div id="dialog">
-    <div>
-      <button id="cancelDialogButton" type="button">
-        <picture>
-          <source srcset="/static/svg/xd.svg" media="(prefers-color-scheme: dark)">
-          <img src="/static/svg/x.svg" style="width: 0.7em; height: 0.7em;" alt="Close" id="closeIcon">
-        </picture>
-      </button>
-    </div>
-    <h2>Tipo de Pago</h2>
-    <div>
-      <p><strong>Pago Único:</strong> El pago debe realizarse manualmente un año después de contratar el servicio, le enviaremos notificaciones al correo electrónico recordando el pago.</p>
-      <p><strong>Pago Automático:</strong> Requiere cuenta de PayPal para rebajo automático, si no tiene una le pedirá configurar rápidamente los datos.</p>
-    </div>
-    <div id="warning-message"><p>Por favor digite los campos requeridos.</p></div>
-    <div id="error-with-payment"></div>
-    <div id="checkout">
-      <div id="method-button-container">
-        <button id="showOneTimeButton" type="button">Pago Único</button>
-        <button id="showSubButton" type="button">Pago Automático</button>
-      </div>
-      <div id="paypal-button-container">
-        <div id="paypal-button-container-order"></div>
-        <div id="paypal-button-container-subscribe"></div>
-      </div>
-    </div>
-  </div>
-  <script src="/app.js"></script>
-  <script src="/static/js/config.editor.js"></script>
-</html>
+<head>
+  <title>Creador CONEX.one</title>
+  <link rel="icon" type="image/svg+xml" href="/static/svg/favicon.svg">
+</head>
+<h1>PayPal SDK & API Integration</h1>
+<div id="editorjs"></div>
+<div id="paypal-button-container"></div>
+<p id="result-message"></p>
+<script src="https://sandbox.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&enable-funding=card&disable-funding=paylater,venmo"></script>
+<!-- EDITORJS -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script><!-- Header -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/simple-image@latest"></script><!-- Image -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script><!-- List -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script><!-- Quote -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script><!-- Code -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script><!-- Embed -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script><!-- Table -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script><!-- Link -->
+<!-- Load Editor.js's Core -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+<!-- EDITORJS -->
+<script src="/app.js"></script>
+<!-- <script src="/static/js/config.editor.js"></script> -->
+<script>
+  // Initialize Editor.js
+  const editor = new EditorJS({
+      holder: 'editorjs',
+      tools: {
+	  header: {
+	      class: Header,
+	      inlineToolbar: true
+	    },
+	}
+    });
+</script>
