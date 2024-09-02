@@ -1,6 +1,10 @@
 BIN = builder
 SRCDIR = server
-SRC = ${SRCDIR}/main.go
+SRC = ${SRCDIR}/init.go \
+      ${SRCDIR}/main.go \
+      ${SRCDIR}/paypal.go \
+      ${SRCDIR}/db.go \
+
 GOFILES = ${SRCDIR}/go.sum ${SRCDIR}/go.mod
 GOMODS = github.com/joho/godotenv github.com/lib/pq
 

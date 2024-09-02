@@ -45,6 +45,17 @@ type Capture struct {
 	} `json:"payer"`
 }
 
+type Receipt struct {
+	PurchaseUnits []struct {
+		Payments struct {
+			Captures []struct {
+				ID     string `json:"id"`
+				Status string `json:"status"`
+			} `json:"captures"`
+		} `json:"payments"`
+	} `json:"purchase_units"`
+}
+
 func Token() (string, error) {
 	req, err := http.NewRequest("POST",
 		os.Getenv("BASE_URL")+"/v1/oauth2/token",
@@ -69,13 +80,10 @@ func Token() (string, error) {
 	return response.AccessToken, nil
 }
 
-func CreateOrder(w http.ResponseWriter, r *http.Request) {
+func CreateOrder() (string, error) {
 	token, err := Token()
 	if err != nil {
-		http.Error(w,
-			"Failed to get access token",
-			http.StatusInternalServerError)
-		return
+		return "", fmt.Errorf("Failed to get acess token: %v", err)
 	}
 
 	type Amount struct {
@@ -129,10 +137,7 @@ func CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	raw, err := http.DefaultClient.Do(req)
 	if err != nil {
-		http.Error(w,
-			"Failed to send request",
-			http.StatusInternalServerError)
-		return
+		return "", fmt.Errorf("Failed to send request: %v", err)
 	}
 	defer raw.Body.Close()
 
@@ -141,64 +146,16 @@ func CreateOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(raw.Body).Decode(&response); err != nil {
-		http.Error(w,
-			"Failed to decode response",
-			http.StatusInternalServerError)
-		return
+		return "", fmt.Errorf("Failed to decode response: %v", err)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-	return
+	return response.ID, nil
 }
 
-func CaptureOrder(w http.ResponseWriter, r *http.Request) {
-	info, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w,
-			"Failed to read request body",
-			http.StatusInternalServerError)
-		return
-	}
-
-	var cart struct {
-		Directory  string          `json:"directory"`
-		EditorData json.RawMessage `json:"editor_data"`
-	}
-
-	err = json.Unmarshal(info, &cart)
-	if err != nil {
-		http.Error(w,
-			"Failed to parse request body",
-			http.StatusBadRequest)
-		return
-	}
-
-	directory := cart.Directory
-	editorData := cart.EditorData
-	if err != nil {
-		http.Error(w,
-			"Failed to parse request body",
-			http.StatusBadRequest)
-		return
-	}
-
-	path := strings.TrimPrefix(r.URL.Path, "/api/orders/")
-	parts := strings.Split(path, "/")
-	orderID := parts[0]
-	if orderID == "" {
-		http.Error(w,
-			"Failed to get orderID from client URL",
-			http.StatusInternalServerError)
-		return
-	}
-
+func CaptureOrder(orderID string) (Capture, Receipt, error) {
 	token, err := Token()
 	if err != nil {
-		http.Error(w,
-			"Failed to get access token",
-			http.StatusInternalServerError)
-		return
+		return Capture{}, Receipt{}, fmt.Errorf("Failed to get acess token: %v", err)
 	}
 
 	req, err := http.NewRequest("POST",
@@ -209,57 +166,25 @@ func CaptureOrder(w http.ResponseWriter, r *http.Request) {
 
 	raw, err := http.DefaultClient.Do(req)
 	if err != nil {
-		http.Error(w,
-			"Failed to send request",
-			http.StatusInternalServerError)
-		return
+		return Capture{}, Receipt{}, fmt.Errorf("Failed to send request: %v", err)
 	}
 	defer raw.Body.Close()
 
+	var capture Capture
+	var receipt Receipt
+
 	body, err := io.ReadAll(raw.Body)
 	if err != nil {
-		http.Error(w,
-			"Failed to read response body",
-			http.StatusInternalServerError)
-		return
+		return Capture{}, Receipt{}, fmt.Errorf("Failed to read response body: %v", err)
 	}
 
-	var capture Capture
-	if err := json.Unmarshal(body, &capture); err != nil {
-		http.Error(w,
-			"Failed to decode response into capture",
-			http.StatusInternalServerError)
-		return
+	if err := json.NewDecoder(bytes.NewReader(body)).Decode(&capture); err != nil {
+		return Capture{}, Receipt{}, fmt.Errorf("Failed to decode into capture: %v", err)
 	}
 
-	var receipt = struct {
-		PurchaseUnits []struct {
-			Payments struct {
-				Captures []struct {
-					ID     string `json:"id"`
-					Status string `json:"status"`
-				} `json:"captures"`
-			} `json:"payments"`
-		} `json:"purchase_units"`
-	}{}
-
-	if err := json.Unmarshal(body, &receipt); err != nil {
-		http.Error(w,
-			"Failed to decode response into receipt",
-			http.StatusInternalServerError)
-		return
+	if err := json.NewDecoder(bytes.NewReader(body)).Decode(&receipt); err != nil {
+		return Capture{}, Receipt{}, fmt.Errorf("Failed to decode into capture: %v", err)
 	}
 
-	RegisterSite(capture, directory, editorData)
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(receipt); err != nil {
-		http.Error(w,
-			"Failed to encode response",
-			http.StatusInternalServerError)
-		return
-	}
-
-	return
+	return capture, receipt, nil
 }
-
