@@ -38,11 +38,13 @@ func RegisterSitePayment(capture Capture, directory string, editorData json.RawM
 		country string
 	)
 
-	id = capture.PurchaseUnits[0].Payments.Captures[0].ID
-	amount = capture.PurchaseUnits[0].Payments.Captures[0].Amount.Value
-	currency = capture.PurchaseUnits[0].Payments.Captures[0].Amount.CurrencyCode
-	pstatus = capture.PurchaseUnits[0].Payments.Captures[0].Status
-	date = capture.PurchaseUnits[0].Payments.Captures[0].CreateTime
+	captureData := capture.PurchaseUnits[0].Payments.Captures[0]
+
+	id = captureData.ID
+	amount = captureData.Amount.Value
+	currency = captureData.Amount.CurrencyCode
+	pstatus = captureData.Status
+	date = captureData.CreateTime
 	wstatus = "down"
 	due = date.AddDate(1, 0, 0)
 	name = capture.Payer.Name.GivenName
@@ -52,32 +54,34 @@ func RegisterSitePayment(capture Capture, directory string, editorData json.RawM
 	country = capture.Payer.Address.CountryCode
 
 	var pkey int
-	newSite := db.QueryRow(`SELECT id FROM sites WHERE folder = $1`, directory).Scan(&pkey)
+	newSite := db.QueryRow(`
+		SELECT id FROM sites WHERE folder = $1
+		`, directory).Scan(&pkey)
 
 	if newSite == sql.ErrNoRows {
-		if err := db.QueryRow(
-			`INSERT INTO sites (folder, status, due, name, sur, email, phone, code, raw)
+		if err := db.QueryRow(`
+			INSERT INTO sites (folder, status, due, name, sur, email, phone, code, raw)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-			RETURNING id`,
-			directory, wstatus, due,
+			RETURNING id
+			`, directory, wstatus, due,
 			name, surname, email, phone, country,
 			editorData).Scan(&pkey); err != nil {
 			return fmt.Errorf("%s: %v", errDBRegisterSite, err)
 		}
 	} else {
-		if err := db.QueryRow(
-			`UPDATE sites SET due = due + INTERVAL '1 year'
+		if err := db.QueryRow(`
+			UPDATE sites SET due = due + INTERVAL '1 year'
 			WHERE id = $1
-			RETURNING id`,
-			pkey).Scan(&pkey); err != nil {
+			RETURNING id
+			`, pkey).Scan(&pkey); err != nil {
 			return fmt.Errorf("%s: %v", errDBUpdateDue, err)
 		}
 	}
 
-	if _, err := db.Exec(
-		`INSERT INTO payments (capture, site, amount, currency, date, status)
-		VALUES ($1, $2, $3, $4, $5, $6)`,
-		id, pkey, amount, currency, date, pstatus); err != nil {
+	if _, err := db.Exec(`
+		INSERT INTO payments (capture, site, amount, currency, date, status)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		`, id, pkey, amount, currency, date, pstatus); err != nil {
 		return fmt.Errorf("%s: %v", errDBRegisterPayment, err)
 	}
 
@@ -97,22 +101,22 @@ func UpdateSite(by string, pkey int, editorData json.RawMessage) error {
 	}()
 
 	var prev json.RawMessage
-	if err := tx.QueryRow(
-		`SELECT raw FROM sites WHERE id = $1`,
-		pkey).Scan(&prev); err != nil {
+	if err := tx.QueryRow(`
+		SELECT raw FROM sites WHERE id = $1
+		`, pkey).Scan(&prev); err != nil {
 		return fmt.Errorf("%s: %v", errDBGetPrevRaw, err)
 	}
 
-	if _, err = tx.Exec(
-		`UPDATE sites SET raw = $1 WHERE id = $2`,
-		editorData, pkey); err != nil {
+	if _, err = tx.Exec(`
+		UPDATE sites SET raw = $1 WHERE id = $2
+		`, editorData, pkey); err != nil {
 		return fmt.Errorf("%s: %v", errDBUpdateRaw, err)
 	}
 
-	if _, err = tx.Exec(
-		`INSERT INTO changes (by, site, payment, col, prev, next, date)
-		VALUES ($1, $2, NULL, 'raw', $3, $4, CURRENT_DATE);`,
-		by, pkey, prev, editorData); err != nil {
+	if _, err = tx.Exec(`
+		INSERT INTO changes (by, site, payment, col, prev, next, date)
+		VALUES ($1, $2, NULL, 'raw', $3, $4, CURRENT_DATE);
+		`, by, pkey, prev, editorData); err != nil {
 		return fmt.Errorf("%s: %v", errDBChangesRaw, err)
 	}
 

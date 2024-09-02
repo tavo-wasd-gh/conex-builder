@@ -37,19 +37,13 @@ CREATE TABLE sites (
 );
 #+END_SRC
 
-#+BEGIN_SRC sql :results silent
-INSERT INTO sites (folder, status, due, name, sur, email, phone, code)
-VALUES ('athos', 'up', '2025-08-31T20:26:58Z', 'John', 'Doe', 'john@doe', '8888-8888', 'CR');
-#+END_SRC
-
 #+BEGIN_SRC sql
 SELECT * FROM sites;
 #+END_SRC
 
 #+RESULTS:
-| id | folder    | status | due                    | name | sur | email                                 |      phone | code | raw                                                                                                                                                                                                                                         |
-|----+-----------+--------+------------------------+------+-----+---------------------------------------+------------+------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|  1 | gofitness | down   | 2025-09-01 01:18:08-06 | John | Doe | sb-8kx8c32267916@personal.example.com | 5068031951 | CR   | {"time": 1725175087581, "blocks": [{"id": "dGd_EGtUWN", "data": {"text": "asdfasdfasdfasdf", "level": 2}, "type": "header"}, {"id": "z9UoyyRH_4", "data": {"text": "asdfasdfasdfasdfa Hi<br>"}, "type": "paragraph"}], "version": "2.30.5"} |
+| id | folder | status | due | name | sur | email | phone | code | raw |
+|----+--------+--------+-----+------+-----+-------+-------+------+-----|
 
 ** Payments table
 
@@ -66,11 +60,6 @@ CREATE TABLE payments (
     status   VARCHAR(18) NOT NULL, -- PayPal capture status length -- https://developer.paypal.com/docs/api/orders/v2/#orders_capture
     date     DATE NOT NULL
 );
-#+END_SRC
-
-#+BEGIN_SRC sql :results silent
-INSERT INTO payments (capture, site, amount, currency, date, status)
-VALUES ('5PS47268T4115691X', 1, 20.00, 'USD', '2024-08-30', 'COMPLETED');
 #+END_SRC
 
 #+BEGIN_SRC sql
@@ -103,8 +92,7 @@ SELECT * FROM changes;
 #+END_SRC
 
 #+RESULTS:
-| id | by | site | payment | col | prev | next | date |
-|----+----+------+---------+-----+------+------+------|
+|---|
 
 ** Types of changes
 

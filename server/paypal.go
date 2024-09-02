@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -72,7 +71,7 @@ type Receipt struct {
 func Token() (string, error) {
 	req, err := http.NewRequest("POST",
 		os.Getenv("BASE_URL")+"/v1/oauth2/token",
-		strings.NewReader(`grant_type=client_credentials`))
+		bytes.NewBufferString(`grant_type=client_credentials`))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.SetBasicAuth(os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET"))
 
@@ -85,7 +84,6 @@ func Token() (string, error) {
 	var response struct {
 		AccessToken string `json:"access_token"`
 	}
-
 	if err := json.NewDecoder(raw.Body).Decode(&response); err != nil {
 		return "", fmt.Errorf("%s: %v", errTokenResp, err)
 	}
@@ -191,11 +189,11 @@ func CaptureOrder(orderID string) (Capture, Receipt, error) {
 		return Capture{}, Receipt{}, fmt.Errorf("%s: %v", errCaptureOrderResp, err)
 	}
 
-	if err := json.NewDecoder(bytes.NewReader(body)).Decode(&capture); err != nil {
+	if err := json.Unmarshal(body, &capture); err != nil {
 		return Capture{}, Receipt{}, fmt.Errorf("%s: %v", errCaptureOrderDecodeCapture, err)
 	}
 
-	if err := json.NewDecoder(bytes.NewReader(body)).Decode(&receipt); err != nil {
+	if err := json.Unmarshal(body, &receipt); err != nil {
 		return Capture{}, Receipt{}, fmt.Errorf("%s: %v", errCaptureOrderDecodeReceipt, err)
 	}
 

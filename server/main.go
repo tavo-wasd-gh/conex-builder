@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -36,7 +35,7 @@ func main() {
 	port := os.Getenv("PORT")
 
 	go func() {
-		log.Println(msgServerStart + ": " + port + "...")
+		msg(msgServerStart + ": " + port + "...")
 		if err := http.ListenAndServe(":"+port, nil); err != nil {
 			fatal(err, errServerStart)
 		}
@@ -45,7 +44,11 @@ func main() {
 	<-stop
 
 	shutdown()
-	log.Println(msgServerShutdown)
+	msg(msgServerShutdown)
+}
+
+func msg(notice string) {
+	log.Println(notice)
 }
 
 func fail(w http.ResponseWriter, err error, notice string) {
@@ -76,28 +79,20 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CaptureOrderHandler(w http.ResponseWriter, r *http.Request) {
-	info, err := io.ReadAll(r.Body)
-	if err != nil {
-		fail(w, err, errReadBody)
-		return
-	}
 	var cart struct {
 		Directory  string          `json:"directory"`
 		EditorData json.RawMessage `json:"editor_data"`
 	}
-	err = json.Unmarshal(info, &cart)
-	if err != nil {
-		fail(w, err, errParseBody)
+	if err := json.NewDecoder(r.Body).Decode(&cart); err != nil {
+		fail(w, err, errReadBody)
 		return
 	}
-	directory := cart.Directory
-	editorData := cart.EditorData
 
 	path := strings.TrimPrefix(r.URL.Path, "/api/orders/")
 	parts := strings.Split(path, "/")
 	orderID := parts[0]
 	if orderID == "" {
-		fail(w, err, errGetOrderID)
+		fail(w, nil, errGetOrderID)
 		return
 	}
 
@@ -107,8 +102,8 @@ func CaptureOrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := RegisterSitePayment(capture, directory, editorData); err != nil {
-		fail(w, err, errRegisterSite+": "+directory)
+	if err := RegisterSitePayment(capture, cart.Directory, cart.EditorData); err != nil {
+		fail(w, err, errRegisterSite+": "+cart.Directory)
 		return
 	}
 
