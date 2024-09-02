@@ -28,6 +28,7 @@ func main() {
 
 	http.HandleFunc("/api/orders", CreateOrderHandler)
 	http.HandleFunc("/api/orders/", CaptureOrderHandler)
+	// http.HandleFunc("/api/updateadfasad/", UpdateSiteHandler)
 	http.Handle("/", http.FileServer(http.Dir("./public")))
 
 	stop := make(chan os.Signal, 1)
