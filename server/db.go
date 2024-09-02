@@ -9,6 +9,17 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const (
+	errDBRegisterSite       = "Error: db.go (sites): Register site"
+	errDBUpdateDue          = "Error: db.go (sites): Update due date"
+	errDBRegisterPayment    = "Error: db.go (payments): Register payment"
+	errDBTXBeginUpdateSite  = "Error: db.go: Begin transaction"
+	errDBTXCommitUpdateSite = "Error: db.go: Commit transaction"
+	errDBGetPrevRaw         = "Error: db.go (sites): Query old raw json"
+	errDBUpdateRaw          = "Error: db.go (sites): Update raw json"
+	errDBChangesRaw         = "Error: db.go (changes): Register raw json change"
+)
+
 func RegisterSitePayment(capture Capture, directory string, editorData json.RawMessage) error {
 	var (
 		// Payment
@@ -51,7 +62,7 @@ func RegisterSitePayment(capture Capture, directory string, editorData json.RawM
 			directory, wstatus, due,
 			name, surname, email, phone, country,
 			editorData).Scan(&pkey); err != nil {
-			return fmt.Errorf("Error: Could not register site to database: %v", err)
+			return fmt.Errorf("%s: %v", errDBRegisterSite, err)
 		}
 	} else {
 		if err := db.QueryRow(
@@ -59,7 +70,7 @@ func RegisterSitePayment(capture Capture, directory string, editorData json.RawM
 			WHERE id = $1
 			RETURNING id`,
 			pkey).Scan(&pkey); err != nil {
-			return fmt.Errorf("Error: Could not update due date: %v", err)
+			return fmt.Errorf("%s: %v", errDBUpdateDue, err)
 		}
 	}
 
@@ -67,7 +78,7 @@ func RegisterSitePayment(capture Capture, directory string, editorData json.RawM
 		`INSERT INTO payments (capture, site, amount, currency, date, status)
 		VALUES ($1, $2, $3, $4, $5, $6)`,
 		id, pkey, amount, currency, date, pstatus); err != nil {
-		return fmt.Errorf("Error: Could not register payment to database: %v", err)
+		return fmt.Errorf("%s: %v", errDBRegisterPayment, err)
 	}
 
 	return nil
@@ -76,7 +87,7 @@ func RegisterSitePayment(capture Capture, directory string, editorData json.RawM
 func UpdateSite(by string, pkey int, editorData json.RawMessage) error {
 	tx, err := db.Begin()
 	if err != nil {
-		return fmt.Errorf("Error: Could not start transaction: %v", err)
+		return fmt.Errorf("%s: %v", errDBTXBeginUpdateSite, err)
 	}
 
 	defer func() {
@@ -89,24 +100,24 @@ func UpdateSite(by string, pkey int, editorData json.RawMessage) error {
 	if err := tx.QueryRow(
 		`SELECT raw FROM sites WHERE id = $1`,
 		pkey).Scan(&prev); err != nil {
-		return fmt.Errorf("Error: Could not retrieve old value: %v", err)
+		return fmt.Errorf("%s: %v", errDBGetPrevRaw, err)
 	}
 
 	if _, err = tx.Exec(
 		`UPDATE sites SET raw = $1 WHERE id = $2`,
 		editorData, pkey); err != nil {
-		return fmt.Errorf("Error: Could not update raw column: %v", err)
+		return fmt.Errorf("%s: %v", errDBUpdateRaw, err)
 	}
 
 	if _, err = tx.Exec(
 		`INSERT INTO changes (by, site, payment, col, prev, next, date)
 		VALUES ($1, $2, NULL, 'raw', $3, $4, CURRENT_DATE);`,
 		by, pkey, prev, editorData); err != nil {
-		return fmt.Errorf("Error: Could not register change to database: %v", err)
+		return fmt.Errorf("%s: %v", errDBChangesRaw, err)
 	}
 
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("Error: Could not commit transaction: %v", err)
+		return fmt.Errorf("%s: %v", errDBTXCommitUpdateSite, err)
 	}
 
 	return nil

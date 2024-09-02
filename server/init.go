@@ -9,6 +9,14 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const (
+	msgClosingDBConn = "Msg: init.go: Closing database connection"
+	msgDBConn        = "Msg: init.go: Established database connection"
+	errDBConn        = "Fatal: init.go: Connect to database"
+	errDBPing        = "Fatal: init.go: Ping database"
+	errClosingDBConn = "Fatal: init.go: Closing database connection"
+)
+
 var db *sql.DB
 
 func initialize() {
@@ -30,20 +38,21 @@ func initialize() {
 		" password="+os.Getenv("DB_PASS")+
 		" dbname="+os.Getenv("DB_NAME"))
 	if err != nil {
-		log.Fatalf("Error 001: Can't connect to database: %v", err)
+		log.Fatalf("%s: %v", errDBConn, err)
 	}
 
 	if err := db.Ping(); err != nil {
-		log.Fatalf("Error 001: Can't connect to database: %v", err)
+		log.Fatalf("%s: %v", errDBPing, err)
 	}
 
-	log.Println("Established database connection")
+	log.Println(msgDBConn)
 }
 
 func shutdown() {
 	if db != nil {
+		log.Println(msgClosingDBConn)
 		if err := db.Close(); err != nil {
-			log.Fatalf("Error: Can't close database connection: %v", err)
+			log.Fatalf("%s: %v", errClosingDBConn, err)
 		}
 	}
 }

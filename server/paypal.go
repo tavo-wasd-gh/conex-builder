@@ -11,6 +11,19 @@ import (
 	"time"
 )
 
+const (
+	errTokenReq                  = "Error: paypal.go: Send token request"
+	errTokenResp                 = "Error: paypal.go: Decode token response"
+	errToken                     = "Error: paypal.go: Get access token"
+	errCreateOrderReq            = "Error: paypal.go: Send CreateOrder request"
+	errCreateOrderResp           = "Error: paypal.go: Decode CreateOrder response"
+	errCaptureOrderToken         = "Error: paypal.go: Get access token for CaptureOrder"
+	errCaptureOrderReq           = "Error: paypal.go: Send CaptureOrder request"
+	errCaptureOrderResp          = "Error: paypal.go: Decode CaptureOrder response"
+	errCaptureOrderDecodeCapture = "Error: paypal.go: Decode CaptureOrder capture"
+	errCaptureOrderDecodeReceipt = "Error: paypal.go: Decode CaptureOrder receipt"
+)
+
 type Capture struct {
 	ID            string `json:"id"`
 	Status        string `json:"status"`
@@ -65,7 +78,7 @@ func Token() (string, error) {
 
 	raw, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("Error sending request: %v", err)
+		return "", fmt.Errorf("%s: %v", errTokenReq, err)
 	}
 	defer raw.Body.Close()
 
@@ -74,7 +87,7 @@ func Token() (string, error) {
 	}
 
 	if err := json.NewDecoder(raw.Body).Decode(&response); err != nil {
-		return "", fmt.Errorf("Error decoding response: %v", err)
+		return "", fmt.Errorf("%s: %v", errTokenResp, err)
 	}
 
 	return response.AccessToken, nil
@@ -83,7 +96,7 @@ func Token() (string, error) {
 func CreateOrder() (string, error) {
 	token, err := Token()
 	if err != nil {
-		return "", fmt.Errorf("Failed to get acess token: %v", err)
+		return "", fmt.Errorf("%s: %v", errToken, err)
 	}
 
 	type Amount struct {
@@ -137,7 +150,7 @@ func CreateOrder() (string, error) {
 
 	raw, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("Failed to send request: %v", err)
+		return "", fmt.Errorf("%s: %v", errCreateOrderReq, err)
 	}
 	defer raw.Body.Close()
 
@@ -146,7 +159,7 @@ func CreateOrder() (string, error) {
 	}
 
 	if err := json.NewDecoder(raw.Body).Decode(&response); err != nil {
-		return "", fmt.Errorf("Failed to decode response: %v", err)
+		return "", fmt.Errorf("%s: %v", errCreateOrderResp, err)
 	}
 
 	return response.ID, nil
@@ -155,7 +168,7 @@ func CreateOrder() (string, error) {
 func CaptureOrder(orderID string) (Capture, Receipt, error) {
 	token, err := Token()
 	if err != nil {
-		return Capture{}, Receipt{}, fmt.Errorf("Failed to get acess token: %v", err)
+		return Capture{}, Receipt{}, fmt.Errorf("%s: %v", errCaptureOrderToken, err)
 	}
 
 	req, err := http.NewRequest("POST",
@@ -166,7 +179,7 @@ func CaptureOrder(orderID string) (Capture, Receipt, error) {
 
 	raw, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return Capture{}, Receipt{}, fmt.Errorf("Failed to send request: %v", err)
+		return Capture{}, Receipt{}, fmt.Errorf("%s: %v", errCaptureOrderReq, err)
 	}
 	defer raw.Body.Close()
 
@@ -175,15 +188,15 @@ func CaptureOrder(orderID string) (Capture, Receipt, error) {
 
 	body, err := io.ReadAll(raw.Body)
 	if err != nil {
-		return Capture{}, Receipt{}, fmt.Errorf("Failed to read response body: %v", err)
+		return Capture{}, Receipt{}, fmt.Errorf("%s: %v", errCaptureOrderResp, err)
 	}
 
 	if err := json.NewDecoder(bytes.NewReader(body)).Decode(&capture); err != nil {
-		return Capture{}, Receipt{}, fmt.Errorf("Failed to decode into capture: %v", err)
+		return Capture{}, Receipt{}, fmt.Errorf("%s: %v", errCaptureOrderDecodeCapture, err)
 	}
 
 	if err := json.NewDecoder(bytes.NewReader(body)).Decode(&receipt); err != nil {
-		return Capture{}, Receipt{}, fmt.Errorf("Failed to decode into capture: %v", err)
+		return Capture{}, Receipt{}, fmt.Errorf("%s: %v", errCaptureOrderDecodeReceipt, err)
 	}
 
 	return capture, receipt, nil

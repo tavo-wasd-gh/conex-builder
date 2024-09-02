@@ -11,6 +11,19 @@ import (
 	"syscall"
 )
 
+const (
+	msgServerStart    = "Msg: main.go: Starting server"
+	msgServerShutdown = "Msg: main.go: Server shutdown gracefully"
+	errServerStart    = "Fatal: main.go: Start server"
+	errReadBody       = "Error: main.go: Read request body"
+	errParseBody      = "Error: main.go: Parse request body"
+	errGetOrderID     = "Error: main.go: Get orderID from client URL"
+	errCaptureOrder   = "Error: main.go: Capture order"
+	errRegisterSite   = "Error: main.go: Register site in database"
+	errEncodeResponse = "Error: main.go: Encode response"
+	errCreateOrder    = "Error: main.go: Obtain orderID"
+)
+
 func main() {
 	initialize()
 
@@ -23,16 +36,16 @@ func main() {
 	port := os.Getenv("PORT")
 
 	go func() {
-		log.Println("Starting server on " + port + "...")
+		log.Println(msgServerStart + ": " + port + "...")
 		if err := http.ListenAndServe(":"+port, nil); err != nil {
-			log.Fatalf("Error: 002: Can't start server: %v\n", err)
+			fatal(err, errServerStart)
 		}
 	}()
 
 	<-stop
 
 	shutdown()
-	log.Println("Server shutdown gracefully.")
+	log.Println(msgServerShutdown)
 }
 
 func fail(w http.ResponseWriter, err error, notice string) {
@@ -40,10 +53,15 @@ func fail(w http.ResponseWriter, err error, notice string) {
 	http.Error(w, notice, http.StatusInternalServerError)
 }
 
+func fatal(err error, notice string) {
+	shutdown()
+	log.Fatalf("%s: %v", notice, err)
+}
+
 func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 	orderID, err := CreateOrder()
 	if err != nil {
-		fail(w, err, "Failed to obtain orderID")
+		fail(w, err, errCreateOrder)
 		return
 	}
 
@@ -60,7 +78,7 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 func CaptureOrderHandler(w http.ResponseWriter, r *http.Request) {
 	info, err := io.ReadAll(r.Body)
 	if err != nil {
-		fail(w, err, "Failed to read request body")
+		fail(w, err, errReadBody)
 		return
 	}
 	var cart struct {
@@ -69,7 +87,7 @@ func CaptureOrderHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = json.Unmarshal(info, &cart)
 	if err != nil {
-		fail(w, err, "Failed to parse request body")
+		fail(w, err, errParseBody)
 		return
 	}
 	directory := cart.Directory
@@ -79,24 +97,24 @@ func CaptureOrderHandler(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(path, "/")
 	orderID := parts[0]
 	if orderID == "" {
-		fail(w, err, "Failed to get orderID from client URL")
+		fail(w, err, errGetOrderID)
 		return
 	}
 
 	capture, receipt, err := CaptureOrder(orderID)
 	if err != nil {
-		fail(w, err, "Failed to capture order")
+		fail(w, err, errCaptureOrder)
 		return
 	}
 
 	if err := RegisterSitePayment(capture, directory, editorData); err != nil {
-		fail(w, err, "Failed to register '"+directory+"'in database")
+		fail(w, err, errRegisterSite+": "+directory)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(receipt); err != nil {
-		fail(w, err, "Failed to encode response")
+		fail(w, err, errEncodeResponse)
 		return
 	}
 
