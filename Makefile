@@ -4,9 +4,12 @@ SRC = ${SRCDIR}/init.go \
       ${SRCDIR}/main.go \
       ${SRCDIR}/paypal.go \
       ${SRCDIR}/db.go \
+      ${SRCDIR}/auth.go \
 
 GOFILES = ${SRCDIR}/go.sum ${SRCDIR}/go.mod
-GOMODS = github.com/joho/godotenv github.com/lib/pq
+GOMODS = github.com/joho/godotenv \
+	 github.com/lib/pq \
+	 gopkg.in/gomail.v2 \
 
 all: ${BIN}
 

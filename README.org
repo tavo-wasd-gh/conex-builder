@@ -22,7 +22,7 @@ CREATE DATABASE iterone OWNER conex;
 DROP TABLE IF EXISTS changes;
 DROP TABLE IF EXISTS payments;
 DROP TABLE IF EXISTS sites;
-
+     
 CREATE TABLE sites (
     id     SERIAL PRIMARY KEY,
     folder VARCHAR(35) UNIQUE NOT NULL,
@@ -33,7 +33,9 @@ CREATE TABLE sites (
     email  VARCHAR(100) NOT NULL,
     phone  VARCHAR(20),
     code   VARCHAR(2),
-    raw    JSONB NOT NULL
+    raw    JSONB NOT NULL,
+    auth   INTEGER,
+    valid  TIMESTAMPTZ
 );
 #+END_SRC
 
@@ -42,8 +44,8 @@ SELECT * FROM sites;
 #+END_SRC
 
 #+RESULTS:
-| id | folder | status | due | name | sur | email | phone | code | raw |
-|----+--------+--------+-----+------+-----+-------+-------+------+-----|
+| id | folder | status | due | name | sur | email | phone | code | raw | auth | valid |
+|----+--------+--------+-----+------+-----+-------+-------+------+-----+------+-------|
 
 ** Payments table
 
@@ -58,7 +60,7 @@ CREATE TABLE payments (
     amount   DECIMAL(10, 2) NOT NULL,
     currency VARCHAR(3) NOT NULL,
     status   VARCHAR(18) NOT NULL, -- PayPal capture status length -- https://developer.paypal.com/docs/api/orders/v2/#orders_capture
-    date     DATE NOT NULL
+    date     TIMESTAMPTZ NOT NULL
 );
 #+END_SRC
 
@@ -76,13 +78,12 @@ SELECT * FROM payments;
 DROP TABLE IF EXISTS changes;
 
 CREATE TABLE changes (
-    id      INTEGER PRIMARY KEY,
+    id      SERIAL PRIMARY KEY,
     by      VARCHAR(20) NOT NULL,
     site    INTEGER REFERENCES sites(id),
     payment INTEGER REFERENCES payments(id),
     col     VARCHAR(6) NOT NULL,
-    prev    VARCHAR(8) NOT NULL,
-    next    VARCHAR(8) NOT NULL,
+    descrip VARCHAR(120) NOT NULL,
     date    DATE NOT NULL
 );
 #+END_SRC
@@ -92,7 +93,8 @@ SELECT * FROM changes;
 #+END_SRC
 
 #+RESULTS:
-|---|
+| id | by | site | payment | col | descrip | date |
+|----+----+------+---------+-----+---------+------|
 
 ** Types of changes
 
@@ -111,6 +113,7 @@ SELECT * FROM changes;
 - email: prev/next
 - phone: prev/next
 - code: prev/next
+- raw: prev/next
 
 * Error codes
 

@@ -21,6 +21,10 @@ const (
 	errRegisterSite   = "Error: main.go: Register site in database"
 	errEncodeResponse = "Error: main.go: Encode response"
 	errCreateOrder    = "Error: main.go: Obtain orderID"
+	errAuthGen        = "Error: main.go: Gen and register auth"
+	errAuthEmail      = "Error: main.go: Send auth email"
+	errAuthValidate   = "Error: main.go: Validate changes"
+	errUpdateSite     = "Error: main.go: Updating site data"
 )
 
 func main() {
@@ -28,7 +32,8 @@ func main() {
 
 	http.HandleFunc("/api/orders", CreateOrderHandler)
 	http.HandleFunc("/api/orders/", CaptureOrderHandler)
-	// http.HandleFunc("/api/updateadfasad/", UpdateSiteHandler)
+	http.HandleFunc("/api/update", UpdateSiteHandler)
+	http.HandleFunc("/api/confirm", ConfirmChangesHandler)
 	http.Handle("/", http.FileServer(http.Dir("./public")))
 
 	stop := make(chan os.Signal, 1)
@@ -52,9 +57,11 @@ func msg(notice string) {
 	log.Println(notice)
 }
 
-func fail(w http.ResponseWriter, err error, notice string) {
+func httpErrorAndLog(w http.ResponseWriter,
+	err error, notice string, client string,
+) {
 	log.Printf("%s: %v", notice, err)
-	http.Error(w, notice, http.StatusInternalServerError)
+	http.Error(w, client, http.StatusInternalServerError)
 }
 
 func fatal(err error, notice string) {
@@ -65,7 +72,7 @@ func fatal(err error, notice string) {
 func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 	orderID, err := CreateOrder()
 	if err != nil {
-		fail(w, err, errCreateOrder)
+		httpErrorAndLog(w, err, errCreateOrder, "Error creating order")
 		return
 	}
 
@@ -80,12 +87,14 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CaptureOrderHandler(w http.ResponseWriter, r *http.Request) {
+	errClientNotice := "Error capturing order"
+
 	var cart struct {
 		Directory  string          `json:"directory"`
 		EditorData json.RawMessage `json:"editor_data"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&cart); err != nil {
-		fail(w, err, errReadBody)
+		httpErrorAndLog(w, err, errReadBody, errClientNotice)
 		return
 	}
 
@@ -93,24 +102,78 @@ func CaptureOrderHandler(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(path, "/")
 	orderID := parts[0]
 	if orderID == "" {
-		fail(w, nil, errGetOrderID)
+		httpErrorAndLog(w, nil, errGetOrderID, errClientNotice)
 		return
 	}
 
 	capture, receipt, err := CaptureOrder(orderID)
 	if err != nil {
-		fail(w, err, errCaptureOrder)
+		httpErrorAndLog(w, err, errCaptureOrder, errClientNotice)
 		return
 	}
 
 	if err := RegisterSitePayment(capture, cart.Directory, cart.EditorData); err != nil {
-		fail(w, err, errRegisterSite+": "+cart.Directory)
+		httpErrorAndLog(w, err, errRegisterSite+": "+cart.Directory, errClientNotice)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(receipt); err != nil {
-		fail(w, err, errEncodeResponse)
+		httpErrorAndLog(w, err, errEncodeResponse, errClientNotice)
+		return
+	}
+
+	return
+}
+
+func UpdateSiteHandler(w http.ResponseWriter, r *http.Request) {
+	errClientNotice := "Error handling update request"
+
+	var cart struct {
+		Directory string `json:"directory"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&cart); err != nil {
+		httpErrorAndLog(w, err, errReadBody, errClientNotice)
+		return
+	}
+
+	code := GenerateCode()
+
+	email, err := UpdateSiteAuth(cart.Directory, code)
+	if err != nil {
+		httpErrorAndLog(w, err, errAuthGen, errClientNotice)
+		return
+	}
+
+	if err := SendAuthEmail(email, code); err != nil {
+		httpErrorAndLog(w, err, errAuthEmail, errClientNotice)
+		return
+	}
+
+	return
+}
+
+func ConfirmChangesHandler(w http.ResponseWriter, r *http.Request) {
+	errClientNotice := "Error handling confirm changes request"
+
+	var cart struct {
+		Directory  string          `json:"directory"`
+		Code       string          `json:"auth_code"`
+		EditorData json.RawMessage `json:"editor_data"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&cart); err != nil {
+		httpErrorAndLog(w, err, errReadBody, errClientNotice)
+		return
+	}
+
+	pkey, err := ValidateSiteAuth(cart.Directory, cart.Code)
+	if err != nil {
+		httpErrorAndLog(w, err, errAuthValidate, errClientNotice)
+		return
+	}
+
+	if err := UpdateSite(pkey, cart.EditorData); err != nil {
+		httpErrorAndLog(w, err, errUpdateSite, errClientNotice)
 		return
 	}
 

@@ -10,17 +10,20 @@ import (
 )
 
 const (
-	errDBRegisterSite       = "Error: db.go (sites): Register site"
-	errDBUpdateDue          = "Error: db.go (sites): Update due date"
-	errDBRegisterPayment    = "Error: db.go (payments): Register payment"
-	errDBTXBeginUpdateSite  = "Error: db.go: Begin transaction"
-	errDBTXCommitUpdateSite = "Error: db.go: Commit transaction"
-	errDBGetPrevRaw         = "Error: db.go (sites): Query old raw json"
-	errDBUpdateRaw          = "Error: db.go (sites): Update raw json"
-	errDBChangesRaw         = "Error: db.go (changes): Register raw json change"
+	errDBRegisterSite       = "db.go (sites): Register site"
+	errDBUpdateDue          = "db.go (sites): Update due date"
+	errDBRegisterPayment    = "db.go (payments): Register payment"
+	errDBTXBeginUpdateSite  = "db.go: Begin transaction"
+	errDBTXCommitUpdateSite = "db.go: Commit transaction"
+	errDBGetPrevRaw         = "db.go (sites): Query old raw json"
+	errDBUpdateRaw          = "db.go (sites): Update raw json"
+	errDBChangesRaw         = "db.go (changes): Register raw json change"
+	errDBUpdateSiteAuth     = "db.go (sites): Auth"
 )
 
-func RegisterSitePayment(capture Capture, directory string, editorData json.RawMessage) error {
+func RegisterSitePayment(
+	capture Capture, directory string, editorData json.RawMessage,
+) error {
 	var (
 		// Payment
 		id       string
@@ -60,7 +63,8 @@ func RegisterSitePayment(capture Capture, directory string, editorData json.RawM
 
 	if newSite == sql.ErrNoRows {
 		if err := db.QueryRow(`
-			INSERT INTO sites (folder, status, due, name, sur, email, phone, code, raw)
+			INSERT INTO sites
+			(folder, status, due, name, sur, email, phone, code, raw)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 			RETURNING id
 			`, directory, wstatus, due,
@@ -79,7 +83,8 @@ func RegisterSitePayment(capture Capture, directory string, editorData json.RawM
 	}
 
 	if _, err := db.Exec(`
-		INSERT INTO payments (capture, site, amount, currency, date, status)
+		INSERT INTO payments
+		(capture, site, amount, currency, date, status)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		`, id, pkey, amount, currency, date, pstatus); err != nil {
 		return fmt.Errorf("%s: %v", errDBRegisterPayment, err)
@@ -88,7 +93,7 @@ func RegisterSitePayment(capture Capture, directory string, editorData json.RawM
 	return nil
 }
 
-func UpdateSite(by string, pkey int, editorData json.RawMessage) error {
+func UpdateSite(pkey int, editorData json.RawMessage) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return fmt.Errorf("%s: %v", errDBTXBeginUpdateSite, err)
@@ -114,9 +119,10 @@ func UpdateSite(by string, pkey int, editorData json.RawMessage) error {
 	}
 
 	if _, err = tx.Exec(`
-		INSERT INTO changes (by, site, payment, col, prev, next, date)
-		VALUES ($1, $2, NULL, 'raw', $3, $4, CURRENT_DATE);
-		`, by, pkey, prev, editorData); err != nil {
+		INSERT INTO changes
+		(by, site, payment, col, descrip, date)
+		VALUES ($1, $2, NULL, 'raw', $3, CURRENT_DATE);
+		`, "server", pkey, "Cambio automatizado de sitio"); err != nil {
 		return fmt.Errorf("%s: %v", errDBChangesRaw, err)
 	}
 
@@ -125,4 +131,56 @@ func UpdateSite(by string, pkey int, editorData json.RawMessage) error {
 	}
 
 	return nil
+}
+
+func UpdateSiteAuth(folder string, code string) (string, error) {
+	valid := time.Now().Add(5 * time.Minute)
+
+	var email string
+	if err := db.QueryRow(`
+		UPDATE sites
+		SET auth = $1, valid = $2
+		WHERE folder = $3
+		RETURNING email;
+		`, code, valid, folder).Scan(&email); err != nil {
+		return "", fmt.Errorf("%s: %v", errDBUpdateSiteAuth, err)
+	}
+
+	return email, nil
+}
+
+func ValidateSiteAuth(folder string, code string) (int, error) {
+	var dbCode string
+	var validTime time.Time
+
+	err := db.QueryRow(`
+		SELECT auth, valid FROM sites
+		WHERE folder = $1;
+		`, folder).Scan(&dbCode, &validTime)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, fmt.Errorf("%s: %v", "No such directory", err)
+		}
+		return 0, fmt.Errorf("%s: %v", "Failed to query DB", err)
+	}
+
+	if code != dbCode {
+		return 0, fmt.Errorf("%s", "Incorrect code")
+	}
+
+	if time.Now().After(validTime) {
+		return 0, fmt.Errorf("%s", "Auth expired")
+	}
+
+	var pkey int
+	if err := db.QueryRow(`
+		UPDATE sites
+		SET valid = $1
+		WHERE folder = $2
+		RETURNING id;
+		`, time.Now(), folder).Scan(&pkey); err != nil {
+		return 0, fmt.Errorf("%s: %v", "Void used code", err)
+	}
+
+	return pkey, nil
 }
