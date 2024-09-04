@@ -72,49 +72,6 @@ SELECT * FROM payments;
 | id | capture | site | amount | currency | status | date |
 |----+---------+------+--------+----------+--------+------|
 
-** Changes table
-
-#+BEGIN_SRC sql :results silent
-DROP TABLE IF EXISTS changes;
-
-CREATE TABLE changes (
-    id      SERIAL PRIMARY KEY,
-    by      VARCHAR(20) NOT NULL,
-    site    INTEGER REFERENCES sites(id),
-    payment INTEGER REFERENCES payments(id),
-    col     VARCHAR(6) NOT NULL,
-    descrip VARCHAR(120) NOT NULL,
-    date    DATE NOT NULL
-);
-#+END_SRC
-
-#+BEGIN_SRC sql
-SELECT * FROM changes;
-#+END_SRC
-
-#+RESULTS:
-| id | by | site | payment | col | descrip | date |
-|----+----+------+---------+-----+---------+------|
-
-** Types of changes
-
-*** Payments
-
-- status: complete/refunded/modified
-- amount: prev/next
-
-*** Sites
-
-- folder: prev/next
-- status: up/down
-- due: date/date
-- name: prev/next
-- sur: prev/next
-- email: prev/next
-- phone: prev/next
-- code: prev/next
-- raw: prev/next
-
 * Error codes
 
 ** http.Error

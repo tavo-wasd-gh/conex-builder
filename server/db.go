@@ -13,9 +13,6 @@ const (
 	errDBRegisterSite       = "db.go (sites): Register site"
 	errDBUpdateDue          = "db.go (sites): Update due date"
 	errDBRegisterPayment    = "db.go (payments): Register payment"
-	errDBTXBeginUpdateSite  = "db.go: Begin transaction"
-	errDBTXCommitUpdateSite = "db.go: Commit transaction"
-	errDBGetPrevRaw         = "db.go (sites): Query old raw json"
 	errDBUpdateRaw          = "db.go (sites): Update raw json"
 	errDBChangesRaw         = "db.go (changes): Register raw json change"
 	errDBUpdateSiteAuth     = "db.go (sites): Auth"
@@ -94,40 +91,10 @@ func RegisterSitePayment(
 }
 
 func UpdateSite(pkey int, editorData json.RawMessage) error {
-	tx, err := db.Begin()
-	if err != nil {
-		return fmt.Errorf("%s: %v", errDBTXBeginUpdateSite, err)
-	}
-
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		}
-	}()
-
-	var prev json.RawMessage
-	if err := tx.QueryRow(`
-		SELECT raw FROM sites WHERE id = $1
-		`, pkey).Scan(&prev); err != nil {
-		return fmt.Errorf("%s: %v", errDBGetPrevRaw, err)
-	}
-
-	if _, err = tx.Exec(`
+	if _, err := db.Exec(`
 		UPDATE sites SET raw = $1 WHERE id = $2
 		`, editorData, pkey); err != nil {
 		return fmt.Errorf("%s: %v", errDBUpdateRaw, err)
-	}
-
-	if _, err = tx.Exec(`
-		INSERT INTO changes
-		(by, site, payment, col, descrip, date)
-		VALUES ($1, $2, NULL, 'raw', $3, CURRENT_DATE);
-		`, "server", pkey, "Cambio automatizado de sitio"); err != nil {
-		return fmt.Errorf("%s: %v", errDBChangesRaw, err)
-	}
-
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("%s: %v", errDBTXCommitUpdateSite, err)
 	}
 
 	return nil
