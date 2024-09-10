@@ -152,6 +152,11 @@ func CreateOrder() (string, error) {
 	}
 	defer raw.Body.Close()
 
+	if raw.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(raw.Body)
+		return "", fmt.Errorf("PayPal API error: %s", string(body))
+	}
+
 	var response struct {
 		ID string `json:"id"`
 	}
