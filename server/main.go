@@ -70,6 +70,19 @@ func fatal(err error, notice string) {
 }
 
 func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
+	var cart struct {
+		Directory string `json:"directory"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&cart); err != nil {
+		httpErrorAndLog(w, err, errReadBody, "Error decoding response")
+		return
+	}
+	if err := AvailableSite(cart.Directory) ; err != nil {
+		http.Error(w, "Site already exists", http.StatusConflict)
+		log.Printf("%s: %v", "Site already exists", err)
+		return
+	}
+
 	orderID, err := CreateOrder()
 	if err != nil {
 		httpErrorAndLog(w, err, errCreateOrder, "Error creating order")

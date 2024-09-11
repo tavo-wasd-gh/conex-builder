@@ -2,7 +2,7 @@ const editor = new EditorJS({
     // readOnly: false,
     holder: 'editorjs',
 
-    inlineToolbar: ['link', 'marker', 'bold', 'italic'],
+    inlineToolbar: ['marker', 'bold', 'italic'],
     inlineToolbar: true,
     tools: {
         /**
@@ -66,16 +66,11 @@ const editor = new EditorJS({
             shortcut: 'CMD+SHIFT+O'
         },
 
-        linkTool: LinkTool,
-
-        embed: Embed,
-
         table: {
             class: Table,
             inlineToolbar: true,
             shortcut: 'CMD+ALT+T'
         },
-
     },
 
     data: {

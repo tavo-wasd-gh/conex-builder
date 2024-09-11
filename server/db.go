@@ -10,13 +10,28 @@ import (
 )
 
 const (
-	errDBRegisterSite       = "db.go (sites): Register site"
-	errDBUpdateDue          = "db.go (sites): Update due date"
-	errDBRegisterPayment    = "db.go (payments): Register payment"
-	errDBUpdateRaw          = "db.go (sites): Update raw json"
-	errDBChangesRaw         = "db.go (changes): Register raw json change"
-	errDBUpdateSiteAuth     = "db.go (sites): Auth"
+	errDBRegisterSite    = "db.go (sites): Register site"
+	errDBUpdateDue       = "db.go (sites): Update due date"
+	errDBRegisterPayment = "db.go (payments): Register payment"
+	errDBUpdateRaw       = "db.go (sites): Update raw json"
+	errDBChangesRaw      = "db.go (changes): Register raw json change"
+	errDBUpdateSiteAuth  = "db.go (sites): Auth"
 )
+
+func AvailableSite(folder string) error {
+	var exists bool
+	if err := db.QueryRow(`
+		SELECT EXISTS(SELECT * FROM sites WHERE folder = $1)
+		`, folder).Scan(&exists) ; err != nil {
+		return fmt.Errorf("error checking if folder exists: %v", err)
+	}
+
+	if exists {
+		return fmt.Errorf("folder %s already exists", folder)
+	}
+
+	return nil
+}
 
 func RegisterSitePayment(
 	capture Capture, directory string, editorData json.RawMessage,

@@ -6,29 +6,35 @@ paypal.Buttons({
     label: "pay"
   },
   async createOrder() {
-    try {
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+    const requestData = {
+      directory: "gofitness",
+      editor_data: await editor.save()
+    };
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
+    });
 
-      const orderData = await response.json();
-
-      if (orderData.id) {
-        return orderData.id;
+    if (!response.ok) {
+      if (response.status === 409) {
+        resultMessage(`No se puede comprar este sitio, ya existe. Prueba con un nombre diferente`);
       } else {
-        const errorDetail = orderData?.details?.[0];
-        const errorMessage = errorDetail
-          ? `${errorDetail.issue} ${errorDetail.description} (${orderData.debug_id})`
-          : JSON.stringify(orderData);
-
-        throw new Error(errorMessage);
+        resultMessage(`No se puede realizar la compra en este momento`);
       }
-    } catch (error) {
-      console.error(error);
-      resultMessage(`Could not initiate PayPal Checkout...<br><br>${error}`);
+      console.log(`HTTP Error: ${response.status} - ${response.statusText}`);
+      return;
+    }
+
+    const orderData = await response.json();
+
+    if (orderData.id) {
+      return orderData.id;
+    } else {
+      const errorDetail = orderData?.details?.[0];
+      resultMessage(`No se puede realizar la compra en este momento`);
     }
   },
   async onApprove(data, actions) {
