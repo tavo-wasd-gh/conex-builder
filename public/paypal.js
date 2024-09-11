@@ -2,6 +2,8 @@ paypal.Buttons({
   style: {
     shape: "pill",
     layout: "vertical",
+    color: "black",
+    label: "pay"
   },
   async createOrder() {
     try {
@@ -32,8 +34,8 @@ paypal.Buttons({
   async onApprove(data, actions) {
     try {
       const requestData = {
-	directory: "gofitness",
-	editor_data: await editor.save()
+        directory: "gofitness",
+        editor_data: await editor.save()
       };
 
       const response = await fetch(`/api/orders/${data.orderID}/capture`, {
@@ -41,7 +43,7 @@ paypal.Buttons({
         headers: {
           "Content-Type": "application/json",
         },
-	body: JSON.stringify(requestData),
+        body: JSON.stringify(requestData),
       });
 
       const orderData = await response.json();
@@ -68,7 +70,7 @@ paypal.Buttons({
           orderData?.purchase_units?.[0]?.payments?.captures?.[0] ||
           orderData?.purchase_units?.[0]?.payments?.authorizations?.[0];
         resultMessage(
-          `Transaction ${transaction.status}: ${transaction.id}<br><br>See console for all available details`,
+          `Estado: <strong>${transaction.status}</strong><br>ID de transacción: ${transaction.id}<br>Luego de una revisión positiva, su sitio será publicado en menos de 24 horas.`,
         );
         console.log(
           "Capture result",

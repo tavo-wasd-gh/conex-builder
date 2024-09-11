@@ -1,36 +1,68 @@
 <!DOCTYPE html>
-<head>
-  <title>Creador CONEX.one</title>
-  <link rel="icon" type="image/svg+xml" href="/static/svg/favicon.svg">
-</head>
-<h1>PayPal SDK & API Integration</h1>
-<div id="editorjs"></div>
-<div id="paypal-button-container"></div>
-<p id="result-message"></p>
-<script src="https://sandbox.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&enable-funding=card&disable-funding=paylater,venmo"></script>
-<!-- EDITORJS -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script><!-- Header -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/simple-image@latest"></script><!-- Image -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script><!-- List -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script><!-- Quote -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script><!-- Code -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script><!-- Embed -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script><!-- Table -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script><!-- Link -->
-<!-- Load Editor.js's Core -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
-<!-- EDITORJS -->
-<script src="/paypal.js"></script>
-<!-- <script src="/static/js/config.editor.js"></script> -->
-<script>
-  // Initialize Editor.js
-  const editor = new EditorJS({
-      holder: 'editorjs',
-      tools: {
-	  header: {
-	      class: Header,
-	      inlineToolbar: true
-	    },
-	}
-    });
-</script>
+<html lang="es">
+  <head>
+    <title>Builder | CONEX.one </title>
+    <link rel="canonical" href="https://builder.conex.one">
+    <link rel="icon" type="image/svg+xml" href="/static/svg/favicon.svg">
+    <meta name="description" content="Constructor de sitios web de CONEX.one">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="index, follow">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/editorjs-dark.css">
+    <script src="/client.js"></script>
+  </head>
+  <div class="banner" style="background-image: url(/static/svg/banner.svg);">
+    <div class="desc">
+      <input type="text" name="title" class="input-title" placeholder="[Nombre Ejemplo]">
+      <input type="text" name="slogan" class="input-slogan" placeholder="[Slogan llamativo o breve descripción]">
+    </div>
+  </div>
+  <body>
+    <div class="content">
+      <div id="editor-container">
+        <div id="editorjs"></div>
+      </div>
+    </div>
+  </body>
+  <div id="overlay"></div>
+  <div class="floating-buttons" id="floatingButtons">
+    <button class="floating-button" id="openDialogButton">
+      <img src="/static/svg/cart.svg">
+      <span>$20/año</span>
+    </button>
+    <button class="floating-button" id="updateSiteButton">
+      <img src="/static/svg/edit.svg">
+      <span>Editar mi página</span>
+    </button>
+  </div>
+  <div id="dialog">
+    <h2>Contratar por $20 al año</h2>
+    <p>Gracias por elegir nuestro servicio para la compra de sitios web. Luego de ser aprobado, su sitio será publicado en menos de 24 horas a partir de la confirmación de tu compra. Utilizaremos los medios de contacto que proporcione para comunicarnos en caso de cualquier inconveniente con la publicación. Si experimenta algún problema, no dude en ponerte en contacto con nosotros a través de los canales:</p>
+    <ul>
+      <li>Correo electrónico: soporte@tusitio.com</li>
+      <li>Teléfono: +1 234 567 890</li>
+      <li>Horario de atención: Lunes a Viernes, de 9:00 a.m. a 6:00 p.m.</li>
+    </ul>
+    <p id="result-message"></p>
+    <div id="paypal-button-container"></div>
+    <button id="cancelDialogButton" type="button">
+      <picture>
+        <source srcset="/static/svg/xd.svg" media="(prefers-color-scheme: dark)">
+        <img src="/static/svg/x.svg" style="width: 0.7em; height: 0.7em;" alt="Close" id="closeIcon">
+      </picture>
+    </button>
+  </div>
+  <script src="https://sandbox.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&enable-funding=card&disable-funding=paylater,venmo"></script>
+  <script src="/paypal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script><!-- Header -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script><!-- Image -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script><!-- List -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script><!-- Quote -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script><!-- Code -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script><!-- Embed -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script><!-- Table -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/link@latest"></script><!-- Link -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+  <script src="/static/js/config.editor.js"></script>
+</html>

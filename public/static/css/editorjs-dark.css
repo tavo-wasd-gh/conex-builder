@@ -1,0 +1,23 @@
+@media (prefers-color-scheme: dark) {
+  .ce-popover__container {
+    filter: invert(1) hue-rotate(180deg);
+  }
+  *::selection,
+  .ce-block.ce-block--selected .ce-block__content {
+    background-color: var(--hover-background) !important;
+  }
+  .tc-wrap,
+  .tc-wrap * {
+    --color-border: var(--hover-border) !important;
+    --color-text-secondary: var(--hover-border) !important;
+    --color-background: var(--hover-background) !important;
+    --toggler-dots-color: var(--hover-border) !important;
+    --toggler-dots-color-hovered: var(--color) !important;
+  }
+  .ce-toolbar__plus,
+  .ce-toolbar__settings-btn {
+    color: var(--color) !important;
+    background-color: var(--hover-background) !important;
+    border-color: var(--hover-border) !important;
+  }
+}
