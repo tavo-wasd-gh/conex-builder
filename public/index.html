@@ -10,19 +10,20 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/editorjs-dark.css">
-    <script src="/client.js"></script>
   </head>
-  <!-- <div class="banner" style="background-image: url(/static/svg/banner.svg);"> -->
-  <!--   <div class="desc"> -->
-  <!--     <input type="text" name="title" class="input-title" placeholder="[Nombre Ejemplo]"> -->
-  <!--     <input type="text" name="slogan" class="input-slogan" placeholder="[Slogan llamativo o breve descripción]"> -->
-  <!--   </div> -->
-  <!-- </div> -->
   <div class="banner">
-    <img src="/static/svg/banner.svg" class="banner-image"/>
+    <input type="file" id="imageUpload" accept="image/*">
+    <label for="imageUpload" class="upload-button">
+      <img src="/static/svg/edit.svg" alt="Edit Icon" class="icon">
+    </label>
+    <img id="banner" name="banner" src="/static/svg/banner.svg" class="banner-image"/>
     <div class="desc">
-      <input type="text" name="title" class="input-title" placeholder="[Nombre Ejemplo]">
-      <input type="text" name="slogan" class="input-slogan" placeholder="[Slogan llamativo o breve descripción]">
+      <input type="text" id="title" name="title" class="input-title" placeholder="[Nombre Ejemplo]">
+      <input type="text" id="slogan" name="slogan" class="input-slogan" placeholder="[Slogan llamativo o breve descripción]">
+    </div>
+    <div id="status-popup" class="status-popup">
+      <span class="close-popup" onclick="hidePopup()">×</span>
+      <span id="status-message"></span>
     </div>
   </div>
   <body>
@@ -60,6 +61,7 @@
       </picture>
     </button>
   </div>
+  <script src="/client.js"></script>
   <script src="https://sandbox.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&enable-funding=card&disable-funding=paylater,venmo"></script>
   <script src="/paypal.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script><!-- Header -->

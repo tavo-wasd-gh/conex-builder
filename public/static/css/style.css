@@ -296,7 +296,7 @@ button {
 }
 
 .floating-button:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
 
 #updateSiteButton {
@@ -312,4 +312,73 @@ button {
 #openDialogButton {
   background: linear-gradient(135deg, #21532a, #4fc764);
   box-shadow: #27d100 0 10px 20px -15px;
+}
+
+.status-popup {
+  position: fixed;
+  top: 19%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 15px;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.1s ease, visibility 0.1s ease;
+}
+
+.status-popup.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.status-popup.exists {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-popup.available {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.close-popup {
+  position: absolute;
+  top: -4px;
+  right: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#imageUpload {
+  display: none;
+}
+
+.upload-button {
+  position: fixed;
+  top: 2%;
+  left: 2%;
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  border-radius: 10px;
+  border: 1px solid var(--hover-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  overflow: hidden;
+}
+
+.upload-button:hover {
+  background-color: #ffffff40; /* Hover effect */
+}
+
+.upload-button .icon {
+  width: 1em;
+  height: 1em;
 }

@@ -34,6 +34,7 @@ func main() {
 	http.HandleFunc("/api/orders/", CaptureOrderHandler)
 	http.HandleFunc("/api/update", UpdateSiteHandler)
 	http.HandleFunc("/api/confirm", ConfirmChangesHandler)
+	http.HandleFunc("/api/directory/", VerifyDirectoryHandler)
 	http.Handle("/", http.FileServer(http.Dir("./public")))
 
 	stop := make(chan os.Signal, 1)
@@ -190,5 +191,32 @@ func ConfirmChangesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	return
+}
+
+func VerifyDirectoryHandler(w http.ResponseWriter, r *http.Request) {
+	errClientNotice := "Error verifying directory against db"
+
+	path := strings.TrimPrefix(r.URL.Path, "/api/directory/")
+	parts := strings.Split(path, "/")
+	folder := parts[0]
+	if folder == "" {
+		httpErrorAndLog(w, nil, "Error getting directory", errClientNotice)
+		return
+	}
+
+	var response struct {
+		Exists bool `json:"exists"`
+	}
+
+	err := AvailableSite(folder)
+	if err != nil {
+		response.Exists = true
+	} else {
+		response.Exists = false
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 	return
 }

@@ -1,3 +1,6 @@
+const savedData = localStorage.getItem('editor_data');
+const parsedData = savedData ? JSON.parse(savedData) : null;
+
 const editor = new EditorJS({
     // readOnly: false,
     holder: 'editorjs',
@@ -73,7 +76,7 @@ const editor = new EditorJS({
         },
     },
 
-    data: {
+    data: parsedData ? parsedData.editor_data : {
         blocks: [
             {
                 type: "header",
@@ -188,7 +191,7 @@ const editor = new EditorJS({
         }
     },
     onChange: function(api, event) {
-        console.log('something changed', event);
+        saveEditorData();
     }
 });
 

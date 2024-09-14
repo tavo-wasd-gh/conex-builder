@@ -6,9 +6,13 @@ paypal.Buttons({
     label: "pay"
   },
   async createOrder() {
+    const savedData = JSON.parse(localStorage.getItem('editor_data')) || {};
     const requestData = {
-      directory: "gofitness",
-      editor_data: await editor.save()
+      directory: sanitizeDirectoryName(savedData.title),
+      banner: savedData.banner || '/static/svg/banner.svg',
+      title: savedData.title,
+      slogan: savedData.slogan,
+      editor_data: savedData.editor_data
     };
     const response = await fetch("/api/orders", {
       method: "POST",
@@ -20,7 +24,7 @@ paypal.Buttons({
 
     if (!response.ok) {
       if (response.status === 409) {
-        resultMessage(`No se puede comprar este sitio, ya existe. Prueba con un nombre diferente`);
+        resultMessage(`No se puede comprar este sitio, ya existe o tiene un nombre incorrecto. Prueba con un nombre diferente`);
       } else {
         resultMessage(`No se puede realizar la compra en este momento`);
       }
@@ -39,6 +43,7 @@ paypal.Buttons({
   },
   async onApprove(data, actions) {
     try {
+      // @@@ TODO por alguna razon hizo la compra a pesar de que esto estaba mal puesto
       const requestData = {
         directory: "gofitness",
         editor_data: await editor.save()

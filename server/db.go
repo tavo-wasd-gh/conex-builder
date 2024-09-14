@@ -19,6 +19,10 @@ const (
 )
 
 func AvailableSite(folder string) error {
+	if len(folder) <= 3 {
+		return fmt.Errorf("folder name must be longer than 3 characters")
+	}
+
 	var exists bool
 	if err := db.QueryRow(`
 		SELECT EXISTS(SELECT * FROM sites WHERE folder = $1)
