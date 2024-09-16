@@ -41,12 +41,22 @@ func main() {
 	var db *sql.DB
 
 	godotenv.Load()
-	if os.Getenv("BASE_URL") == "" ||
-		os.Getenv("CLIENT_ID") == "" ||
-		os.Getenv("CLIENT_SECRET") == "" ||
-		os.Getenv("RETURN_URL") == "" ||
-		os.Getenv("CANCEL_URL") == "" ||
-		os.Getenv("PORT") == "" {
+	var (
+		baseURL      = os.Getenv("BASE_URL")
+		clientID     = os.Getenv("CLIENT_ID")
+		clientSecret = os.Getenv("CLIENT_SECRET")
+		returnURL    = os.Getenv("RETURN_URL")
+		cancelURL    = os.Getenv("CANCEL_URL")
+		port         = os.Getenv("PORT")
+		// price        = os.Getenv("PRICE")
+	)
+
+	if baseURL == "" ||
+		clientID == "" ||
+		clientSecret == "" ||
+		returnURL == "" ||
+		cancelURL == "" ||
+		port == "" {
 		fatal(nil, errMissingCredentials)
 	}
 
@@ -75,7 +85,6 @@ func main() {
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-	port := os.Getenv("PORT")
 
 	go func() {
 		msg(msgServerStart + ": " + port + "...")

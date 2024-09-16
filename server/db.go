@@ -26,7 +26,7 @@ func AvailableSite(db *sql.DB, folder string) error {
 	var exists bool
 	if err := db.QueryRow(`
 		SELECT EXISTS(SELECT * FROM sites WHERE folder = $1)
-		`, folder).Scan(&exists) ; err != nil {
+		`, folder).Scan(&exists); err != nil {
 		return fmt.Errorf("error checking if folder exists: %v", err)
 	}
 

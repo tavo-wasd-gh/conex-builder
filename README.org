@@ -22,7 +22,7 @@ CREATE DATABASE iterone OWNER conex;
 DROP TABLE IF EXISTS changes;
 DROP TABLE IF EXISTS payments;
 DROP TABLE IF EXISTS sites;
-     
+
 CREATE TABLE sites (
     id     SERIAL PRIMARY KEY,
     folder VARCHAR(35) UNIQUE NOT NULL,
@@ -33,6 +33,9 @@ CREATE TABLE sites (
     email  VARCHAR(100) NOT NULL,
     phone  VARCHAR(20),
     code   VARCHAR(2),
+    title  VARCHAR(35) NOT NULL,
+    slogan VARCHAR(100) NOT NULL,
+    banner TEXT,
     raw    JSONB NOT NULL,
     auth   INTEGER,
     valid  TIMESTAMPTZ
@@ -44,8 +47,8 @@ SELECT * FROM sites;
 #+END_SRC
 
 #+RESULTS:
-| id | folder | status | due | name | sur | email | phone | code | raw | auth | valid |
-|----+--------+--------+-----+------+-----+-------+-------+------+-----+------+-------|
+| id | folder | status | due | name | sur | email | phone | code | title | slogan | banner | raw | auth | valid |
+|----+--------+--------+-----+------+-----+-------+-------+------+-------+--------+--------+-----+------+-------|
 
 ** Payments table
 

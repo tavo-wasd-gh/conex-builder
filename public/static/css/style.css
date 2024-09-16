@@ -92,6 +92,7 @@ a {
 }
 
 .input-slogan {
+  font-family: var(--font-family);
   text-align: center;
   width: 100%;
   background-color: #00000000;
@@ -358,16 +359,15 @@ button {
 }
 
 .upload-button {
-  position: fixed;
-  top: 2%;
-  left: 2%;
-  display: inline-block;
+  position: absolute;
+  top: 0.8em;
+  left: 0.8em;
+  display: inline-flex;
   width: 2em;
   height: 2em;
   border-radius: 10px;
   border: 1px solid var(--hover-border);
   cursor: pointer;
-  display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease;

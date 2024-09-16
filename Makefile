@@ -10,10 +10,17 @@ GOMODS = github.com/joho/godotenv \
 	 github.com/lib/pq \
 	 gopkg.in/gomail.v2 \
 
-all: ${BIN}
+all: ${BIN} fmt
 
 ${BIN}: ${SRC} ${GOFILES}
 	(cd ${SRCDIR} && go build -o ../${BIN})
+
+fmt: ${SRC}
+	@diff=$$(gofmt -d $^); \
+	if [ -n "$$diff" ]; then \
+		printf '%s\n' "$$diff"; \
+		exit 1; \
+	fi
 
 ${GOFILES}:
 	(cd ${SRCDIR} && go mod init ${BIN})
