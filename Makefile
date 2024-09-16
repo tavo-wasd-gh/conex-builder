@@ -1,7 +1,6 @@
 BIN = builder
 SRCDIR = server
-SRC = ${SRCDIR}/init.go \
-      ${SRCDIR}/main.go \
+SRC = ${SRCDIR}/main.go \
       ${SRCDIR}/paypal.go \
       ${SRCDIR}/db.go \
       ${SRCDIR}/auth.go \

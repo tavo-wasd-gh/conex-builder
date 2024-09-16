@@ -18,7 +18,7 @@ const (
 	errDBUpdateSiteAuth  = "db.go (sites): Auth"
 )
 
-func AvailableSite(folder string) error {
+func AvailableSite(db *sql.DB, folder string) error {
 	if len(folder) <= 3 {
 		return fmt.Errorf("folder name must be longer than 3 characters")
 	}
@@ -37,7 +37,7 @@ func AvailableSite(folder string) error {
 	return nil
 }
 
-func RegisterSitePayment(
+func RegisterSitePayment(db *sql.DB,
 	capture Capture, directory string, editorData json.RawMessage,
 ) error {
 	var (
@@ -109,7 +109,7 @@ func RegisterSitePayment(
 	return nil
 }
 
-func UpdateSite(pkey int, editorData json.RawMessage) error {
+func UpdateSite(db *sql.DB, pkey int, editorData json.RawMessage) error {
 	if _, err := db.Exec(`
 		UPDATE sites SET raw = $1 WHERE id = $2
 		`, editorData, pkey); err != nil {
@@ -119,7 +119,7 @@ func UpdateSite(pkey int, editorData json.RawMessage) error {
 	return nil
 }
 
-func UpdateSiteAuth(folder string, code string) (string, error) {
+func UpdateSiteAuth(db *sql.DB, folder string, code string) (string, error) {
 	valid := time.Now().Add(5 * time.Minute)
 
 	var email string
@@ -135,7 +135,7 @@ func UpdateSiteAuth(folder string, code string) (string, error) {
 	return email, nil
 }
 
-func ValidateSiteAuth(folder string, code string) (int, error) {
+func ValidateSiteAuth(db *sql.DB, folder string, code string) (int, error) {
 	var dbCode string
 	var validTime time.Time
 
