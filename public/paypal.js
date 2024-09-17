@@ -93,6 +93,7 @@ paypal.Buttons({
                         Luego de una revisión positiva, su sitio será publicado en menos de 24 horas.
                         <p>
                 `,);
+                document.querySelector("#paypal-button-container").style.display = "none";
                 console.log(
                     "Capture result",
                     orderData,
