@@ -34,7 +34,7 @@ CREATE TABLE sites (
     phone  VARCHAR(20),
     code   VARCHAR(2),
     title  VARCHAR(35) NOT NULL,
-    slogan VARCHAR(100) NOT NULL,
+    slogan VARCHAR(100),
     banner TEXT,
     raw    JSONB NOT NULL,
     auth   INTEGER,

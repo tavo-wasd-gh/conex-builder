@@ -1,5 +1,6 @@
-const savedData = localStorage.getItem('editor_data');
+const savedData = localStorage.getItem('conex_data');
 const parsedData = savedData ? JSON.parse(savedData) : null;
+const directory = parsedData?.directory || "temp";
 
 const editor = new EditorJS({
     // readOnly: false,
@@ -24,31 +25,13 @@ const editor = new EditorJS({
         image: {
             class: ImageTool,
             config: {
-                uploader: {
-                    uploadByFile(file) {
-                        return new Promise((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                                const base64 = event.target.result;
-                                resolve({
-                                    success: 1,
-                                    file: {
-                                        url: base64,
-                                    },
-                                });
-                            };
-                            reader.onerror = reject;
-                            reader.readAsDataURL(file);
-                        });
-                    },
-                    uploadByUrl(url) {
-                        return Promise.resolve({
-                            success: 1,
-                            file: {
-                                url: url,
-                            },
-                        });
-                    },
+                endpoints: {
+                    byFile: `${window.location.origin}/api/upload`,
+                },
+                field: 'file',
+                types: 'image/*',
+                additionalRequestData: {
+                    directory: directory,
                 },
             },
         },
@@ -194,4 +177,3 @@ const editor = new EditorJS({
         saveEditorData();
     }
 });
-

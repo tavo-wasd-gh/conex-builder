@@ -37,9 +37,7 @@ func AvailableSite(db *sql.DB, folder string) error {
 	return nil
 }
 
-func RegisterSitePayment(db *sql.DB,
-	capture Capture, directory string, editorData json.RawMessage,
-) error {
+func RegisterSitePayment(db *sql.DB, capture Capture, cart ConexData) error {
 	var (
 		// Payment
 		id       string
@@ -55,6 +53,12 @@ func RegisterSitePayment(db *sql.DB,
 		email   string
 		phone   string
 		country string
+		// conex_data
+		directory  string
+		title      string
+		slogan     string
+		banner     string
+		editorData json.RawMessage
 	)
 
 	captureData := capture.PurchaseUnits[0].Payments.Captures[0]
@@ -72,6 +76,12 @@ func RegisterSitePayment(db *sql.DB,
 	phone = capture.Payer.Phone.PhoneNumber.NationalNumber
 	country = capture.Payer.Address.CountryCode
 
+	directory = cart.Directory
+	title = cart.Title
+	slogan = cart.Slogan
+	banner = cart.Banner
+	editorData = cart.EditorData
+
 	var pkey int
 	newSite := db.QueryRow(`
 		SELECT id FROM sites WHERE folder = $1
@@ -80,12 +90,12 @@ func RegisterSitePayment(db *sql.DB,
 	if newSite == sql.ErrNoRows {
 		if err := db.QueryRow(`
 			INSERT INTO sites
-			(folder, status, due, name, sur, email, phone, code, raw)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			(folder, status, due, name, sur, email, phone, code, title, slogan, banner, raw)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 			RETURNING id
 			`, directory, wstatus, due,
-			name, surname, email, phone, country,
-			editorData).Scan(&pkey); err != nil {
+			name, surname, email, phone, country, title, slogan,
+			banner, editorData).Scan(&pkey); err != nil {
 			return fmt.Errorf("%s: %v", errDBRegisterSite, err)
 		}
 	} else {

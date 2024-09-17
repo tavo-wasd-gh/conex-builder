@@ -1,20 +1,32 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 const (
+	// Limits
+	maxUploadFileSize = 52428800    // 50MB
+	maxBucketSize     = 10737418240 // 10GB
+	// Messages
 	msgClosingDBConn      = "Msg: init.go: Closing database connection"
 	msgDBConn             = "Msg: init.go: Established database connection"
 	errDBConn             = "Fatal: init.go: Connect to database"
@@ -37,8 +49,17 @@ const (
 	errUpdateSite         = "Error: main.go: Updating site data"
 )
 
+type ConexData struct {
+	Directory  string          `json:"directory"`
+	Banner     string          `json:"banner"`
+	Title      string          `json:"title"`
+	Slogan     string          `json:"slogan"`
+	EditorData json.RawMessage `json:"editor_data"`
+}
+
 func main() {
 	var db *sql.DB
+	var s3Client *s3.Client
 
 	godotenv.Load()
 	var (
@@ -76,11 +97,39 @@ func main() {
 
 	msg(msgDBConn)
 
+	var (
+		bucketName     = os.Getenv("BUCKET_NAME")
+		endpoint       = os.Getenv("BUCKET_ENDPOINT")
+		accessKey      = os.Getenv("BUCKET_ACCESSKEY")
+		secretKey      = os.Getenv("BUCKET_SECRETKEY")
+		region         = os.Getenv("BUCKET_REGION")
+		publicEndpoint = os.Getenv("BUCKET_PUBLIC_ENDPOINT")
+		apiEndpoint    = os.Getenv("BUCKET_API_ENDPOINT")
+		apiToken       = os.Getenv("BUCKET_API_TOKEN")
+	)
+
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion(region),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
+		config.WithEndpointResolver(aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
+			return aws.Endpoint{
+				URL:           endpoint,
+				SigningRegion: region,
+			}, nil
+		})),
+	)
+	if err != nil {
+		fatal(err, errServerStart)
+	}
+
+	s3Client = s3.NewFromConfig(cfg)
+
 	http.HandleFunc("/api/orders", CreateOrderHandler(db))
 	http.HandleFunc("/api/orders/", CaptureOrderHandler(db))
 	http.HandleFunc("/api/update", UpdateSiteHandler(db))
 	http.HandleFunc("/api/confirm", ConfirmChangesHandler(db))
 	http.HandleFunc("/api/directory/", VerifyDirectoryHandler(db))
+	http.HandleFunc("/api/upload", UploadFileHandler(s3Client, endpoint, apiEndpoint, apiToken, bucketName, publicEndpoint))
 	http.Handle("/", http.FileServer(http.Dir("./public")))
 
 	stop := make(chan os.Signal, 1)
@@ -128,6 +177,13 @@ func CreateOrderHandler(db *sql.DB) http.HandlerFunc {
 			httpErrorAndLog(w, err, errReadBody, "Error decoding response")
 			return
 		}
+
+		if len(cart.Directory) > 35 {
+			http.Error(w, "Site already exists", http.StatusConflict)
+			log.Printf("%s: %v", "Site title is too long", nil)
+			return
+		}
+
 		if err := AvailableSite(db, cart.Directory); err != nil {
 			http.Error(w, "Site already exists", http.StatusConflict)
 			log.Printf("%s: %v", "Site already exists", err)
@@ -155,10 +211,7 @@ func CaptureOrderHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		errClientNotice := "Error capturing order"
 
-		var cart struct {
-			Directory  string          `json:"directory"`
-			EditorData json.RawMessage `json:"editor_data"`
-		}
+		var cart ConexData
 		if err := json.NewDecoder(r.Body).Decode(&cart); err != nil {
 			httpErrorAndLog(w, err, errReadBody, errClientNotice)
 			return
@@ -178,8 +231,7 @@ func CaptureOrderHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		if err := RegisterSitePayment(db, capture, cart.Directory,
-			cart.EditorData); err != nil {
+		if err := RegisterSitePayment(db, capture, cart); err != nil {
 			httpErrorAndLog(w, err, errRegisterSite+": "+cart.Directory, errClientNotice)
 			return
 		}
@@ -275,6 +327,65 @@ func VerifyDirectoryHandler(db *sql.DB) http.HandlerFunc {
 			response.Exists = false
 		}
 
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+}
+
+func UploadFileHandler(s3Client *s3.Client, endpoint string, apiEndpoint string,
+	apiToken string, bucketName string, publicEndpoint string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
+			httpErrorAndLog(w, err, "Unable to parse form", "Unable to parse form")
+			return
+		}
+		directory := r.FormValue("directory")
+		if directory == "" || len(directory) < 4 || len(directory) > 35 {
+			err := fmt.Errorf("invalid directory length")
+			httpErrorAndLog(w, err, "Unable to parse form", "Unable to parse form")
+			return
+		}
+
+		file, fileHeader, err := r.FormFile("file")
+		if err != nil {
+			httpErrorAndLog(w, err, "Unable to get the file", "Unable to get the file")
+			return
+		}
+		defer file.Close()
+
+		fileContent, err := io.ReadAll(file)
+		if err != nil {
+			httpErrorAndLog(w, err, "Unable to read file", "Unable to read file")
+			return
+		}
+
+		if len(fileContent) > maxUploadFileSize {
+			httpErrorAndLog(w, err, "File too large", "File too large")
+			return
+		}
+
+		if err := BucketSizeLimit(apiEndpoint, apiToken); err != nil {
+			httpErrorAndLog(w, err, "Bucket limit", "Bucket limit")
+			return
+		}
+
+		objectKey := fmt.Sprintf("%s/%s-%s", directory, time.Now().Format("2006-01-02-15-04-05"), fileHeader.Filename)
+		url, err := UploadFile(s3Client, endpoint, bucketName, publicEndpoint, fileContent, objectKey)
+		if err != nil {
+			httpErrorAndLog(w, err, "Unable to upload file", "Unable to upload file")
+			return
+		}
+
+		var response struct {
+			Success int `json:"success"`
+			File    struct {
+				URL string `json:"url"`
+			} `json:"file"`
+		}
+
+		response.Success = 1
+		response.File.URL = url
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 		return

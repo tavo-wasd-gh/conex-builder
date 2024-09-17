@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-    const savedData = localStorage.getItem('editor_data');
+    const savedData = localStorage.getItem('conex_data');
     if (savedData) {
         const parsedData = JSON.parse(savedData);
         console.log('Loaded parsedData:', parsedData);
@@ -11,14 +11,17 @@ document.addEventListener("DOMContentLoaded", function() {
     const dialog = document.getElementById("dialog");
     const overlay = document.getElementById("overlay");
     const menu = document.getElementById("floatingButtons");
+    const checkoutErrorMessage = document.getElementById("checkout-error-message");
 
     function openDialog() {
+        checkoutErrorMessage.style.display = "none";
         dialog.style.display = "block";
         overlay.style.display = "block";
         menu.style.display = "none";
     }
 
     function closeDialog() {
+        checkoutErrorMessage.style.display = "none";
         dialog.style.display = "none";
         overlay.style.display = "none";
         menu.style.display = "block";
@@ -37,56 +40,60 @@ function saveEditorData() {
 
     editor.save().then((editor_data) => {
         const dataToSave = {
-            banner: banner,
+            directory: sanitizeDirectoryTitle(title),
+            banner: banner || '/static/svg/banner.svg',
             title: title,
             slogan: slogan,
             editor_data: editor_data
         };
-        localStorage.setItem('editor_data', JSON.stringify(dataToSave));
+        localStorage.setItem('conex_data', JSON.stringify(dataToSave));
         console.log('Editor data saved to localStorage');
     }).catch((error) => {
         console.error('Saving failed:', error);
     });
 }
 
-const directoryInput = document.getElementById('title');
-const statusPopup = document.getElementById('status-popup');
-const statusMessage = document.getElementById('status-message');
 
 let typingTimeout;
 let hideTimeout;
-
+const directoryInput = document.getElementById('title');
 directoryInput.addEventListener('input', () => {
     clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => {
-        const directoryName = directoryInput.value.trim();
-        if (directoryName.length > 0) {
-            const sanitizedDirectoryName = sanitizeDirectoryName(directoryName);
-            checkDirectory(sanitizedDirectoryName);
+        const directoryTitle = directoryInput.value.trim();
+        if (directoryTitle.length > 0) {
+            const directory = sanitizeDirectoryTitle(directoryTitle);
+            checkDirectory(directory);
         } else {
             hidePopup();
         }
     }, 500); // Debounce
 });
 
-function sanitizeDirectoryName(name) {
-    return name
+function sanitizeDirectoryTitle(title) {
+    return title
         .toLowerCase()
         .replace(/\s+/g, '-')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9\-]/g, '');
 }
 
-function checkDirectory(name) {
-    if (name.length < 4) {
+function checkDirectory(directory) {
+    if (directory.length < 4) {
         return;
     }
-    fetch(`/api/directory/${encodeURIComponent(name)}`)
+    if (directory.length > 35) {
+        showPopup(`El título no puede exceder los 35 caracteres`, 'exists');
+        return;
+    }
+    fetch(`/api/directory/${encodeURIComponent(directory)}`)
         .then(response => response.json())
         .then(data => {
             if (data.exists) {
-                showPopup(`El sitio web conex.one/${name} ya existe`, 'exists');
+                showPopup(`El sitio web conex.one/${directory} ya existe`, 'exists');
             } else {
-                showPopup(`Se publicará en conex.one/${name}`, 'available');
+                showPopup(`Se publicará en conex.one/${directory}`, 'available');
             }
         })
         .catch(error => {
@@ -133,16 +140,28 @@ function hidePopup(popup, status) {
 }
 
 document.getElementById('imageUpload').addEventListener('change', function (event) {
+    const savedData = localStorage.getItem('conex_data');
+    const parsedData = savedData ? JSON.parse(savedData) : null;
+    const directory = parsedData?.directory || "temp";
     const file = event.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-        const base64Image = e.target.result;
-        document.getElementById('banner').src = base64Image;
-        saveEditorData();
-    };
 
     if (file) {
-        reader.readAsDataURL(file);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('directory', directory);
+
+        fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+        }).then(response => response.json()).then(data => {
+            if (data && data.file && data.file.url) {
+                document.getElementById('banner').src = data.file.url;
+                saveEditorData();
+            } else {
+                console.error('Error: Invalid response format', data);
+            }
+        }).catch(error => {
+            console.error('Error uploading the image:', error);
+        });
     }
 });

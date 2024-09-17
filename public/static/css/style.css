@@ -236,9 +236,23 @@ button {
   margin: 1.5em 0 0 0;
 }
 
-#result-message {
-  text-decoration: underline;
-  color: var(--warning-color);
+#checkout-success-message,
+#checkout-error-message {
+  display: none;
+  padding: 0.8em;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 2em 0;
+}
+
+#checkout-success-message {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+#checkout-error-message {
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 #cancelDialogButton {
@@ -320,8 +334,8 @@ button {
   top: 19%;
   left: 50%;
   transform: translate(-50%, -50%);
-  padding: 15px;
-  border-radius: 5px;
+  padding: 12px;
+  border-radius: 8px;
   background-color: #f0f0f0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   font-size: 16px;
