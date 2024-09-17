@@ -18,8 +18,8 @@
     </label>
     <img id="banner" name="banner" src="/static/svg/banner.svg" class="banner-image"/>
     <div class="desc">
-      <input type="text" id="title" name="title" maxlength="35" class="input-title" placeholder="[Nombre Ejemplo]">
-      <textarea type="text" id="slogan" name="slogan" maxlength="100" class="input-slogan" placeholder="[Slogan llamativo o breve descripción]"></textarea>
+      <input type="text" id="title" name="title" maxlength="35" class="input-title" data-translate="sampleTitle" placeholder="" >
+      <textarea type="text" id="slogan" name="slogan" maxlength="100" class="input-slogan" data-translate="sampleSlogan" placeholder=""></textarea>
     </div>
     <div id="status-popup" class="status-popup">
       <span class="close-popup" onclick="hidePopup()">×</span>
@@ -37,20 +37,20 @@
   <div class="floating-buttons" id="floatingButtons">
     <button class="floating-button" id="openDialogButton">
       <img src="/static/svg/cart.svg">
-      <span>$20/año</span>
+      <span data-translate="buyButton"></span>
     </button>
     <button class="floating-button" id="updateSiteButton">
       <img src="/static/svg/edit.svg">
-      <span>Editar mi página</span>
+      <span data-translate="editButton"></span>
     </button>
   </div>
   <div id="dialog">
-    <h2>Contratar por $20 al año</h2>
-    <p>Gracias por elegir nuestro servicio para la compra de sitios web. Luego de ser aprobado, su sitio será publicado en menos de 24 horas a partir de la confirmación de tu compra. Utilizaremos los medios de contacto que proporcione para comunicarnos en caso de cualquier inconveniente con la publicación. Si experimenta algún problema, no dude en ponerte en contacto con nosotros a través de los canales:</p>
+    <h2 data-translate="checkoutHeader"></h2>
+    <p data-translate="checkoutParagraph"></p>
     <ul>
-      <li>Correo electrónico: soporte@conex.one</li>
-      <!-- <li>Teléfono: +1 234 567 890</li> -->
-      <li>Horario de atención: L-V: 9:00 a.m. - 6:00 p.m.</li>
+      <li data-translate="supportEmail"></li>
+      <!-- <li data-translate="supportPhone"></li> -->
+      <li data-translate="supportSchedule"></li>
     </ul>
     <div id="checkout-error-message"></div>
     <div id="checkout-success-message"></div>

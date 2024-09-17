@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
+    loadLanguage('es');
     const savedData = localStorage.getItem('conex_data');
     if (savedData) {
         const parsedData = JSON.parse(savedData);
@@ -165,3 +166,23 @@ document.getElementById('imageUpload').addEventListener('change', function (even
         });
     }
 });
+
+function loadLanguage(lang) {
+    fetch(`./lang/${lang}.json`)
+        .then(response => response.json())
+        .then(translations => {
+            // Find all elements with a 'data-translate' attribute
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const translationKey = element.getAttribute('data-translate');
+
+                // Check if the element is an input field (update placeholder)
+                if (element.tagName.toLowerCase() === 'input' || element.tagName.toLowerCase() === 'textarea') {
+                    element.placeholder = translations[translationKey];
+                } else {
+                    // Update text content for non-input elements
+                    element.innerText = translations[translationKey];
+                }
+            });
+        })
+        .catch(error => console.error('Error loading language file:', error));
+}
