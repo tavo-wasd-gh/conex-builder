@@ -11,6 +11,27 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/editorjs-dark.css">
   </head>
+  <div class="dashboard">
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="mode-button-container">
+      <h1 class="dashboard-text" data-translate="welcome"></h1>
+      <p class="dashboard-text" data-translate="about"></p>
+      <span data-translate="buyModeButton" id="buyModeButton" class="mode-button buyModeButton"></span>
+      <span data-translate="editModeButton" id="editModeButton" class="mode-button editModeButton"></span>
+    </div>
+    <div id="dashOverlay"></div>
+    <div id="dashDialog">
+      <h2 data-translate="editDialogHeader"></h2>
+      <p data-translate="editDialogParagraph"></p>
+      <input type="text" id="dashBuyInput" name="title" maxlength="35" class="input-title" data-translate="sampleTitle" placeholder="" >
+      <input type="text" id="dashEditInput" name="title" maxlength="35" class="input-title" data-translate="sampleTitle" placeholder="" >
+      <button id="continueToEditMode">
+        <span data-translate="continueToEditMode"></span>
+      </button>
+    </div>
+  </div>
   <div class="banner">
     <input type="file" id="imageUpload" accept="image/*">
     <label for="imageUpload" class="upload-button">
@@ -36,12 +57,16 @@
   <div id="overlay"></div>
   <div class="floating-buttons" id="floatingButtons">
     <button class="floating-button" id="openDialogButton">
-      <img src="/static/svg/cart.svg">
+      <img src="/static/svg/check.svg">
       <span data-translate="buyButton"></span>
     </button>
     <button class="floating-button" id="updateSiteButton">
-      <img src="/static/svg/edit.svg">
+      <img src="/static/svg/check.svg">
       <span data-translate="editButton"></span>
+    </button>
+    <button class="floating-button" id="dashButton">
+      <img src="/static/svg/dash.svg">
+      <span data-translate="dashButton"></span>
     </button>
   </div>
   <div id="dialog">

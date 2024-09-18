@@ -77,7 +77,7 @@ a {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: -1;
+  z-index: -1000;
 }
 
 .input-title {
@@ -151,6 +151,7 @@ footer {
   padding-bottom: 1em;
 }
 
+#dashDialog,
 #dialog {
   width: 85%;
   max-width: 30em;
@@ -170,17 +171,20 @@ footer {
   max-height: 70vh;
 }
 
+#dashDialog h2, #dashDialog p,
 #dialog h2, #dialog p {
   margin: 0;
   padding: 0 0 0.5em 0;
   text-align: justify;
 }
 
+#dashDialog button,
 #dialog button {
   margin: 0.5em 0.5em 0 0;
   padding: 1em;
 }
 
+#dashOverlay,
 #overlay {
   display: none;
   position: fixed;
@@ -192,6 +196,11 @@ footer {
   z-index: 999;
 }
 
+#dashOverlay {
+  z-index: 1000;
+}
+
+#dashDialog input,
 #dialog input {
   text-align: left;
   font-size: 1em;
@@ -203,6 +212,10 @@ footer {
   border-radius: 10px;
   padding: 1em;
   margin: 1em auto;
+}
+
+#dashDialog input {
+  display: none;
 }
 
 #form-container {
@@ -280,14 +293,14 @@ button {
   bottom: 0.2em;
   right: 0.5em;
   gap: 0.4em;
-  z-index: 9999;
+  z-index: 2000;
 }
 
 .floating-button {
   height: 2.5em;
   cursor: pointer;
   font-size: 1em;
-  z-index: 1001;
+  z-index: 2000;
   border-radius: 999px;
   box-sizing: border-box;
   color: rgba(255, 255, 255, 0.85);
@@ -319,14 +332,14 @@ button {
   box-shadow: #0099c5 0 10px 20px -15px;
 }
 
-#deleteSiteButton {
-  background: linear-gradient(135deg, #5e2329, #bf4c58);
-  box-shadow: #e31300 0 10px 20px -15px;
-}
-
 #openDialogButton {
   background: linear-gradient(135deg, #21532a, #4fc764);
   box-shadow: #27d100 0 10px 20px -15px;
+}
+
+#dashButton {
+  background: linear-gradient(45deg, #9b59b6, #6f42c1);
+  box-shadow: #8f53b9 0 10px 20px -15px;
 }
 
 .status-popup {
@@ -343,6 +356,7 @@ button {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.1s ease, visibility 0.1s ease;
+  z-index: 10000;
 }
 
 .status-popup.show {
@@ -389,10 +403,131 @@ button {
 }
 
 .upload-button:hover {
-  background-color: #ffffff40; /* Hover effect */
+  background-color: #ffffff40;
 }
 
 .upload-button .icon {
   width: 1em;
   height: 1em;
+}
+
+.dashboard {
+  background-color: var(--background-color);
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 3000;
+}
+
+.dashboard-text {
+  color: white;
+}
+
+.mode-button-container {
+  width: var(--page-width);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.mode-button {
+  width: 90%;
+  padding: 1em;
+  margin: 1em 0;
+  border-radius: 15px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
+
+.buyModeButton {
+  background: linear-gradient(45deg, #21532a, #4fc764);
+}
+
+.buyModeButton:hover {
+  background: linear-gradient(45deg, #173a1f, #3a9a4d);
+}
+
+.editModeButton {
+  background: linear-gradient(45deg, #3498db, #007bff);
+}
+
+.editModeButton:hover {
+  background: linear-gradient(45deg, #2980b9, #0056b3);
+}
+
+.dashboard {
+  background: linear-gradient(315deg, #0c4848 3%, #071832 98%);
+  animation: gradient 15s ease infinite;
+  background-size: 400% 400%;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+.wave {
+  background: #94e1f080;
+  border-radius: 1000% 1000% 0 0;
+  position: fixed;
+  width: 200%;
+  height: 12em;
+  animation: wave 10s -3s linear infinite;
+  transform: translate3d(0, 0, 0);
+  opacity: 0.8;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.wave:nth-of-type(2) {
+  bottom: -1.25em;
+  animation: wave 18s linear reverse infinite;
+  opacity: 0.8;
+}
+
+.wave:nth-of-type(3) {
+  bottom: -2.5em;
+  animation: wave 20s -1s reverse infinite;
+  opacity: 0.9;
+}
+
+@keyframes wave {
+  2% {
+    transform: translateX(1);
+  }
+
+  25% {
+    transform: translateX(-25%);
+  }
+
+  50% {
+    transform: translateX(-50%);
+  }
+
+  75% {
+    transform: translateX(-25%);
+  }
+
+  100% {
+    transform: translateX(1);
+  }
 }

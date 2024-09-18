@@ -180,3 +180,37 @@ func ValidateSiteAuth(db *sql.DB, folder string, code string) (int, error) {
 
 	return pkey, nil
 }
+
+func FetchSite(db *sql.DB, folder string) (ConexData, error) {
+	var siteData ConexData
+
+	query := `
+		SELECT folder, banner, title, slogan, raw 
+		FROM sites 
+		WHERE folder = $1
+	`
+
+	var rawData []byte
+
+	err := db.QueryRow(query, folder).Scan(
+		&siteData.Directory,
+		&siteData.Banner,
+		&siteData.Title,
+		&siteData.Slogan,
+		&rawData,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return siteData, fmt.Errorf("site not found: %v", folder)
+		}
+		return siteData, fmt.Errorf("error fetching site: %v", err)
+	}
+
+	err = json.Unmarshal(rawData, &siteData.EditorData)
+	if err != nil {
+		return siteData, fmt.Errorf("error unmarshaling editor data: %v", err)
+	}
+
+	return siteData, nil
+}

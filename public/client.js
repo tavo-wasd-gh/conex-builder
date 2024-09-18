@@ -25,13 +25,19 @@ document.addEventListener("DOMContentLoaded", function() {
         checkoutErrorMessage.style.display = "none";
         dialog.style.display = "none";
         overlay.style.display = "none";
-        menu.style.display = "block";
+        menu.style.display = "flex";
     }
 
     document.getElementById("openDialogButton").addEventListener("click", openDialog);
     document.getElementById("cancelDialogButton").addEventListener("click", closeDialog);
     document.getElementById('title').addEventListener('change', saveEditorData);
     document.getElementById('slogan').addEventListener('change', saveEditorData);
+    document.getElementById('buyModeButton').addEventListener('click', buyMode);
+    document.getElementById('editModeButton').addEventListener('click', editModeWrapper);
+    document.getElementById("continueToEditMode").addEventListener('click', function() {
+        editMode(document.getElementById("dashEditInput").value);
+    });
+    document.getElementById('dashButton').addEventListener('click', dashboardMode);
 });
 
 function saveEditorData() {
@@ -54,7 +60,6 @@ function saveEditorData() {
     });
 }
 
-
 let typingTimeout;
 let hideTimeout;
 const directoryInput = document.getElementById('title');
@@ -65,6 +70,20 @@ directoryInput.addEventListener('input', () => {
         if (directoryTitle.length > 0) {
             const directory = sanitizeDirectoryTitle(directoryTitle);
             checkDirectory(directory);
+        } else {
+            hidePopup();
+        }
+    }, 500); // Debounce
+});
+
+const directoryBuyInput = document.getElementById('dashEditInput');
+directoryBuyInput.addEventListener('input', () => {
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+        const directoryTitle = directoryBuyInput.value.trim();
+        if (directoryTitle.length > 0) {
+            const directory = sanitizeDirectoryTitle(directoryTitle);
+            checkDirectoryReverse(directory);
         } else {
             hidePopup();
         }
@@ -95,6 +114,29 @@ function checkDirectory(directory) {
                 showPopup(`El sitio web conex.one/${directory} ya existe`, 'exists');
             } else {
                 showPopup(`Se publicará en conex.one/${directory}`, 'available');
+            }
+        })
+        .catch(error => {
+            console.error('Error checking directory:', error);
+            showPopup('Error checking directory.', 'exists');
+        });
+}
+
+function checkDirectoryReverse(directory) {
+    if (directory.length < 4) {
+        return;
+    }
+    if (directory.length > 35) {
+        showPopup(`El título no puede exceder los 35 caracteres`, 'exists');
+        return;
+    }
+    fetch(`/api/directory/${encodeURIComponent(directory)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                showPopup(`Editar el sitio web conex.one/${directory}`, 'available');
+            } else {
+                showPopup(`El sitio conex.one/${directory} no está registrado`, 'exists');
             }
         })
         .catch(error => {
@@ -185,4 +227,84 @@ function loadLanguage(lang) {
             });
         })
         .catch(error => console.error('Error loading language file:', error));
+}
+
+function dashboardMode() {
+    document.getElementById("dashOverlay").style.display = "none";
+    document.getElementById("dashDialog").style.display = "none";
+
+    const dashboard = document.querySelector('.dashboard');
+
+    dashboard.style.display = 'flex';
+    setTimeout(() => {
+        dashboard.style.transition = 'opacity 0.5s ease';
+        dashboard.style.opacity = '1';
+    }, 10);
+}
+
+function buyMode() {
+    document.getElementById("openDialogButton").style.display = "block";
+    document.getElementById("updateSiteButton").style.display = "none";
+    const dashboard = document.querySelector('.dashboard');
+    dashboard.style.transition = 'opacity 0.5s ease';
+    dashboard.style.opacity = '0';
+
+    setTimeout(() => {
+        dashboard.style.display = 'none';
+    }, 500);
+}
+
+async function editMode(dir) {
+    const success = await loadEditorData(dir);
+    if (!success) {
+        console.error("Data could not be loaded, aborting UI changes");
+        return;
+    }
+    document.getElementById("openDialogButton").style.display = "none";
+    document.getElementById("updateSiteButton").style.display = "block";
+    const dashboard = document.querySelector('.dashboard');
+    dashboard.style.transition = 'opacity 0.5s ease';
+    dashboard.style.opacity = '0';
+
+    setTimeout(() => {
+        dashboard.style.display = 'none';
+    }, 500);
+}
+
+function editModeWrapper() {
+    document.getElementById("dashOverlay").style.display = "block";
+    document.getElementById("dashDialog").style.display = "block";
+    document.getElementById("dashEditInput").style.display = "block";
+}
+
+function loadEditorData(dirname) {
+    return new Promise((resolve, reject) => {
+        fetch(`/api/fetch/${dirname}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Populate the data into the form elements
+                document.getElementById('banner').src = data.banner || '/static/svg/banner.svg';
+                document.getElementById('title').value = data.title || '';
+                document.getElementById('slogan').value = data.slogan || '';
+
+                // Load editor data if available
+                if (data.editor_data && typeof editor !== 'undefined') {
+                    editor.render({
+                        blocks: data.editor_data.blocks || []
+                    });
+                }
+
+                console.log('Editor data loaded successfully');
+                resolve(true); // Resolve with success
+            })
+            .catch(error => {
+                console.error('Fetching and loading data failed:', error);
+                resolve(false); // Resolve with failure, but not reject to avoid unhandled errors
+            });
+    });
 }

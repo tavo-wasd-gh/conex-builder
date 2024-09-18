@@ -129,6 +129,7 @@ func main() {
 	http.HandleFunc("/api/update", UpdateSiteHandler(db))
 	http.HandleFunc("/api/confirm", ConfirmChangesHandler(db))
 	http.HandleFunc("/api/directory/", VerifyDirectoryHandler(db))
+	http.HandleFunc("/api/fetch/", FetchSiteHandler(db))
 	http.HandleFunc("/api/upload", UploadFileHandler(s3Client, endpoint, apiEndpoint, apiToken, bucketName, publicEndpoint))
 	http.Handle("/", http.FileServer(http.Dir("./public")))
 
@@ -388,6 +389,31 @@ func UploadFileHandler(s3Client *s3.Client, endpoint string, apiEndpoint string,
 		response.File.URL = url
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
+		return
+	}
+}
+
+func FetchSiteHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		errClientNotice := "Error fetching site from db"
+
+		path := strings.TrimPrefix(r.URL.Path, "/api/fetch/")
+		parts := strings.Split(path, "/")
+		folder := parts[0]
+		if folder == "" {
+			httpErrorAndLog(w, nil, "Error getting directory", errClientNotice)
+			return
+		}
+
+		var siteData ConexData
+		siteData, err := FetchSite(db, folder)
+		if err != nil {
+			httpErrorAndLog(w, err, "Error fetching site data", "Error fetching site data")
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(siteData)
 		return
 	}
 }
