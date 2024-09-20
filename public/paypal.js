@@ -90,8 +90,11 @@ paypal.Buttons({
                         <p>
                         Estado: <strong>${transaction.status}</strong><br>
                         ID de transacción: ${transaction.id}<br>
-                        Luego de una revisión positiva, su sitio será publicado en menos de 24 horas.
+                        Luego de una revisión positiva, su sitio será publicado en menos de 24 horas en el enlace:
+                        </p>
                         <p>
+			<a href="https://conex.one/${savedData.directory}/">conex.one/${savedData.directory}</a>
+                        </p>
                 `,);
                 document.querySelector("#paypal-button-container").style.display = "none";
                 console.log(

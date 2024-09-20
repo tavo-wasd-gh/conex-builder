@@ -1,66 +1,63 @@
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <title>Builder | CONEX.one </title>
-    <link rel="canonical" href="https://builder.conex.one">
+    <title>Editor | CONEX.one </title>
+    <link rel="canonical" href="https://editor.conex.one">
     <link rel="icon" type="image/svg+xml" href="/static/svg/favicon.svg">
     <meta name="description" content="Constructor de sitios web de CONEX.one">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="index, follow">
     <meta charset="utf-8">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/editorjs-dark.css">
   </head>
-  <div class="dashboard">
+  <div id="status-popup" class="status-popup">
+    <span class="close-popup" onclick="hidePopup()">×</span>
+    <span id="status-message"></span>
+  </div>
+  <div id="overlay"></div>
+  <div id="dashboard">
     <div class="wave"></div>
     <div class="wave"></div>
     <div class="wave"></div>
-    <div class="mode-button-container">
-      <h1 class="dashboard-text" data-translate="welcome"></h1>
-      <p class="dashboard-text" data-translate="about"></p>
-      <span data-translate="buyModeButton" id="buyModeButton" class="mode-button buyModeButton"></span>
-      <span data-translate="editModeButton" id="editModeButton" class="mode-button editModeButton"></span>
-    </div>
-    <div id="dashOverlay"></div>
-    <div id="dashDialog">
-      <h2 data-translate="editDialogHeader"></h2>
-      <p data-translate="editDialogParagraph"></p>
-      <input type="text" id="dashBuyInput" name="title" maxlength="35" class="input-title" data-translate="sampleTitle" placeholder="" >
-      <input type="text" id="dashEditInput" name="title" maxlength="35" class="input-title" data-translate="sampleTitle" placeholder="" >
-      <button id="continueToEditMode">
-        <span data-translate="continueToEditMode"></span>
-      </button>
+    <div class="dashboard-content">
+      <h1 data-translate="welcome"></h1>
+      <p data-translate="about"></p>
+      <span id="buyModeButton">
+        <h4 data-translate="buyModeButton"></h4>
+        <p class="localstorage-exists" data-translate="buyModeButtonDisclaimer"></p>
+      </span>
+      <span id="continueEditingModeButton">
+        <h4 data-translate="continueEditingModeButton"></h4>
+      </span>
+      <span id="editModeButton">
+        <h4 data-translate="editModeButton"></h4>
+        <p class="localstorage-exists" data-translate="editModeButtonDisclaimer"></p>
+      </span>
     </div>
   </div>
   <div class="banner">
-    <input type="file" id="imageUpload" accept="image/*">
-    <label for="imageUpload" class="upload-button">
-      <img src="/static/svg/image.svg" alt="Edit Icon" class="icon">
-    </label>
-    <img id="banner" name="banner" src="/static/svg/banner.svg" class="banner-image"/>
-    <div class="desc">
-      <input type="text" id="title" name="title" maxlength="35" class="input-title" data-translate="sampleTitle" placeholder="" >
-      <textarea type="text" id="slogan" name="slogan" maxlength="100" class="input-slogan" data-translate="sampleSlogan" placeholder=""></textarea>
+    <div class="banner-toolbar">
+      <input type="file" id="uploadBannerBtn" class="tool-button-input" accept="image/*">
+      <label for="uploadBannerBtn" class="tool-button">
+        <img src="/static/svg/image.svg" alt="Edit Icon" class="icon">
+        <span class="loader"></span>
+      </label>
     </div>
-    <div id="status-popup" class="status-popup">
-      <span class="close-popup" onclick="hidePopup()">×</span>
-      <span id="status-message"></span>
+    <img id="banner" src="/static/svg/banner.svg" class="banner-image"/>
+    <div class="desc">
+      <input type="text" id="title" maxlength="35" class="input-title" data-translate="sampleTitle" placeholder="" >
+      <textarea type="text" id="slogan" maxlength="100" class="input-slogan" data-translate="sampleSlogan" placeholder=""></textarea>
     </div>
   </div>
   <body>
-    <div class="content">
-      <div id="editor-container">
-        <div id="editorjs"></div>
-      </div>
-    </div>
+    <div id="editorjs"></div>
   </body>
-  <div id="overlay"></div>
-  <div class="floating-buttons" id="floatingButtons">
-    <button class="floating-button" id="openDialogButton">
+  <div class="floating-buttons-container" id="floatingButtons">
+    <button class="floating-button" id="buyButton">
       <img src="/static/svg/check.svg">
       <span data-translate="buyButton"></span>
     </button>
-    <button class="floating-button" id="updateSiteButton">
+    <button class="floating-button" id="editButton">
       <img src="/static/svg/check.svg">
       <span data-translate="editButton"></span>
     </button>
@@ -70,32 +67,33 @@
     </button>
   </div>
   <div id="dialog">
-    <h2 data-translate="checkoutHeader"></h2>
-    <p data-translate="checkoutParagraph"></p>
-    <ul>
-      <li data-translate="supportEmail"></li>
-      <!-- <li data-translate="supportPhone"></li> -->
-      <li data-translate="supportSchedule"></li>
-    </ul>
-    <div id="checkout-error-message"></div>
-    <div id="checkout-success-message"></div>
-    <div id="paypal-button-container"></div>
-    <button id="cancelDialogButton" type="button">
+    <button id="closeDialogButton" type="button">
       <picture>
         <source srcset="/static/svg/xd.svg" media="(prefers-color-scheme: dark)">
-        <img src="/static/svg/x.svg" style="width: 0.7em; height: 0.7em;" alt="Close" id="closeIcon">
+        <img src="/static/svg/x.svg" style="width: 1em; height: 1em;" id="closeIcon">
       </picture>
     </button>
+    <div id="checkoutDialog">
+      <div class="message success-message" style="display:block" data-translate="checkoutSaveNotif"></div>
+      <h2 data-translate="checkoutHeader"></h2>
+      <p data-translate="checkoutParagraph"></p>
+      <ul>
+        <li data-translate="supportEmail"></li>
+        <li data-translate="supportPhone"></li>
+        <li data-translate="supportSchedule"></li>
+      </ul>
+      <div class="message success-message" id="checkout-success-message"></div>
+      <div class="message error-message" id="checkout-error-message"></div>
+      <div id="paypal-button-container"></div>
+    </div>
+    <div id="editDialog">
+      <h2 data-translate="editDialogHeader"></h2>
+      <p data-translate="editDialogParagraph"></p>
+      <input class="input-dialog" type="text" id="editModeDirectoryInput" name="title" maxlength="35" placeholder="https://conex.one/mi-sitio"><br>
+      <button id="continueToEditModeButton" class="right">
+        <span data-translate="continueToEditModeButton"></span>
+      </button>
+    </div>
   </div>
   <script src="/client.js"></script>
-  <script src="https://sandbox.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&enable-funding=card&disable-funding=paylater,venmo"></script>
-  <script src="/paypal.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script><!-- Header -->
-  <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script><!-- Image -->
-  <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script><!-- List -->
-  <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script><!-- Quote -->
-  <script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script><!-- Code -->
-  <script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script><!-- Table -->
-  <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
-  <script src="/editor.js"></script>
 </html>
