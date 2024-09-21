@@ -1,0 +1,23 @@
+Copyright (C) 2024 Conex
+
+Política de Privacidad
+
+En Conex, nos comprometemos a proteger tu privacidad y la de tus
+usuarios. Recolectamos únicamente los siguientes datos personales: Correo
+electrónico, Teléfono, Nombre.
+
+Esta información se utiliza exclusivamente para la recuperación de
+cuentas, autenticación y contacto con los usuarios. Toda la información
+que recolectamos es estrictamente privada y no se comparte con terceros. Los
+datos se almacenan en Costa Rica, bajo prácticas de seguridad rigurosas.
+
+Uso de los Datos: Nos aseguramos de utilizar esta información únicamente
+para los fines antes mencionados.
+
+Medidas de Seguridad: Conex ha implementado medidas de seguridad para proteger
+la información personal que nos proporcionas, incluyendo medidas físicas,
+electrónicas y procedimentales. Ofrecemos acceso seguro HTTPS a la mayoría
+de las áreas de nuestros servicios y monitoreamos regularmente nuestros
+sistemas para detectar vulnerabilidades y posibles ataques.
+
+Copyright (C) 2024 Conex

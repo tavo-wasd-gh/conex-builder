@@ -39,6 +39,15 @@
   .floating-button span {
     display: none;
   }
+  .footer-content {
+    flex-direction: column;
+  }
+  .footer-links {
+    flex-direction: column;
+  }
+  .footer-links li {
+    margin: 10px 0;
+  }
 }
 
 html {
@@ -444,7 +453,7 @@ a {
   padding: 0.8em;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin: 2em 0;
+  margin: 0 0 2em 0;
 }
 
 .success-message {
