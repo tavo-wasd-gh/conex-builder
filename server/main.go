@@ -284,6 +284,7 @@ func ConfirmChangesHandler(db *sql.DB) http.HandlerFunc {
 			Directory  string          `json:"directory"`
 			Code       string          `json:"auth_code"`
 			EditorData json.RawMessage `json:"editor_data"`
+			Slogan     string          `json:"slogan"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&cart); err != nil {
 			httpErrorAndLog(w, err, errReadBody, errClientNotice)
@@ -296,7 +297,7 @@ func ConfirmChangesHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		if err := UpdateSite(db, pkey, cart.EditorData); err != nil {
+		if err := UpdateSite(db, pkey, cart.EditorData, cart.Slogan); err != nil {
 			httpErrorAndLog(w, err, errUpdateSite, errClientNotice)
 			return
 		}

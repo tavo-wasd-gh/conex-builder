@@ -21,9 +21,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const checkoutDialog = document.getElementById("checkoutDialog");
     const editDialog = document.getElementById("editDialog");
     const buyDialog = document.getElementById("buyDialog");
+    const updateContentDialog = document.getElementById("updateContentDialog");
 
     checkoutDialog.style.display = "none";
     editDialog.style.display = "none";
+    buyDialog.style.display = "none";
+    updateContentDialog.style.display = "none";
     loadLanguage('es');
 
     Promise.all(EditorJSComponents.map(src => loadScript(src))).then(() => {
@@ -58,7 +61,7 @@ function loadEditorState() {
     if (savedData) {
         const parsedData = JSON.parse(savedData);
         console.log('Loaded parsedData:', parsedData);
-        document.getElementById('title').value = parsedData.title || '';
+        document.getElementById('title').innerText = parsedData.title || '';
         document.getElementById('slogan').value = parsedData.slogan || '';
         document.getElementById('banner').src = parsedData.banner || '/static/svg/banner.svg';
         const disclaimers = document.querySelectorAll(".localstorage-exists");
@@ -82,7 +85,7 @@ function loadEditorState() {
             })
             .catch(error => console.error('Error loading translation file:', error));
     } else {
-        document.getElementById('title').value = '';
+        document.getElementById('title').innerText = '';
         document.getElementById('slogan').value = '';
         document.getElementById('banner').src = '/static/svg/banner.svg';
         document.getElementById("continueEditingModeButton").style.display = "none";
@@ -104,28 +107,73 @@ function initializeEventListeners() {
     });
 
     document.getElementById("buyButton").addEventListener("click", () => openDialog(checkoutDialog));
+    document.getElementById("editButton").addEventListener("click", () => openDialog(updateContentDialog));
     document.getElementById("closeDialogButton").addEventListener("click", () => closeDialog());
 
     // // Editor save
-    document.getElementById('title').addEventListener('change', saveEditorData);
+    // document.getElementById('title').addEventListener('change', saveEditorData);
     document.getElementById('slogan').addEventListener('change', saveEditorData);
 
     // // Mode switching
-    // document.getElementById('buyModeButton').addEventListener('click', openBuyModeDialog);
-    document.getElementById('buyModeButton').addEventListener('click', buyMode);
+    document.getElementById('buyModeButton').addEventListener('click', openBuyModeDialog);
     document.getElementById('editModeButton').addEventListener('click', openEditModeDialog);
+    document.getElementById("continueToBuyModeButton").addEventListener('click', async () => {
+        const directory = sanitizeDirectoryTitle(document.getElementById("buyModeDirectoryInput").value);
+        const exists = await checkDirectoryExists(directory);
+        if (exists) {
+            document.getElementById("checkdir-error-message").style.display = "block";
+            document.getElementById("checkdir-error-message").innerHTML = `El sitio https://conex.one/${directory} ya existe.`;
+        } else {
+            document.getElementById("checkdir-error-message").style.display = "none";
+            buyMode(directory);
+        }
+    });
+
     document.getElementById("continueToEditModeButton").addEventListener('click', () =>
-        editMode(document.getElementById("editModeDirectoryInput").value)
+        editMode(extractSitePath(document.getElementById("editModeDirectoryInput").value))
     );
     document.getElementById('continueEditingModeButton').addEventListener('click', continueMode);
 
     document.getElementById('dashButton').addEventListener('click', dashboardMode);
     document.getElementById('uploadBannerBtn').addEventListener('change', handleImageUpload);
 
-    const titleElement = document.getElementById('title');
-    if (titleElement) {
-        setupDirectoryInput(titleElement);
-    }
+    document.getElementById('requestChangesButton').addEventListener('click', async () => {
+        const button = document.getElementById('requestChangesButton');
+        button.disabled = true;
+        button.classList.add('disabled');
+
+        await updateSiteRequest();
+
+        setTimeout(() => {
+            button.disabled = false;
+            button.classList.remove('disabled');
+        }, 3000);
+    });
+
+    document.getElementById('confirmChangesButton').addEventListener('click', function() {
+        successElement = document.getElementById('update-success-message');
+        errorElement = document.getElementById('update-error-message');
+
+        const codeInput = document.getElementById('updateContentCodeInput').value;
+        if (codeInput.length === 6 && !isNaN(codeInput)) {
+            document.getElementById('updateContentCodeInput').value = '';
+            errorElement.style.display = "none"
+            updateSiteConfirm(codeInput);
+        } else {
+            successElement.style.display = "none"
+            errorElement.style.display = "block"
+            errorElement.innerHTML = "El código es un pin numérico de 6 dígitos.";
+            console.error('Invalid code. Please enter a 6-digit number.');
+        }
+    });
+
+    const titleElement = document.getElementById('buyModeDirectoryInput');
+    titleElement.addEventListener('input', debounce(function() {
+        const directory = titleElement.value.trim();
+        if (directory.length > 0) {
+            validateDirectory(directory);
+        }
+    }, 500));  // 500ms debounce
 }
 
 function openDialog(content) {
@@ -135,21 +183,31 @@ function openDialog(content) {
     floatingButtons.style.display = "none";
 }
 
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
 function closeDialog() {
     checkoutDialog.style.display = "none";
     editDialog.style.display = "none";
-    // buyDialog.style.display = "none";
+    buyDialog.style.display = "none";
+    updateContentDialog.style.display = "none";
     dialog.style.display = "none";
     overlay.style.display = "none";
     floatingButtons.style.display = "flex";
     document.getElementById('checkout-error-message').style.display = "none";
+    document.getElementById('update-error-message').style.display = "none";
 }
 
 function saveEditorData() {
-    const titleValue = document.getElementById('title').value.trim();
+    const titleValue = document.getElementById('title').innerText.trim();
     const dataToSave = {
         banner: document.getElementById('banner').src || '/static/svg/banner.svg',
-        title: document.getElementById('title').value,
+        title: document.getElementById('title').innerText,
         slogan: document.getElementById('slogan').value,
         directory: sanitizeDirectoryTitle(titleValue)
     };
@@ -162,21 +220,37 @@ function saveEditorData() {
     });
 }
 
-function setupDirectoryInput(inputElement, debounceTime = 500) {
-    inputElement.addEventListener('input', () => {
-        clearTimeout(typingTimeout);
+function validateDirectory(directory) {
+    successMessageElement = document.getElementById('checkdir-success-message');
+    errorMessageElement = document.getElementById('checkdir-error-message');
+    successMessageElement.textContent = '';
+    errorMessageElement.textContent = '';
 
-        typingTimeout = setTimeout(() => {
-            const inputValue = inputElement.value.trim();
+    if (!validateDirectoryLength(directory)) {
+        successMessageElement.style.display = "none";
+        errorMessageElement.style.display = "block";
+        errorMessageElement.textContent = 'Directory name must be between 4 and 35 characters.';
+        return;
+    }
 
-            if (inputValue.length > 0) {
-                const sanitizedValue = sanitizeDirectoryTitle(inputValue);  // Sanitize the input value
-                checkDirectory(sanitizedValue);
+    directory = sanitizeDirectoryTitle(directory)
+    checkDirectoryExists(directory)
+        .then(exists => {
+            if (exists) {
+                successMessageElement.style.display = "none";
+                errorMessageElement.style.display = "block";
+                errorMessageElement.textContent = `El sitio https://conex.one/${directory} ya existe.`;
             } else {
-                hidePopup();
+                successMessageElement.style.display = "block";
+                errorMessageElement.style.display = "none";
+                successMessageElement.textContent = `Se publicará en https://conex.one/${directory}`;
             }
-        }, debounceTime);
-    });
+        })
+        .catch(() => {
+            successMessageElement.style.display = "none";
+            errorMessageElement.style.display = "block";
+            errorMessageElement.textContent = 'Error occurred while checking the directory.';
+        });
 }
 
 function sanitizeDirectoryTitle(title) {
@@ -188,25 +262,12 @@ function sanitizeDirectoryTitle(title) {
         .replace(/[^a-z0-9\-]/g, '');
 }
 
-function checkDirectory(directory) {
-    if (!validateDirectoryLength(directory)) return;
-    fetchDirectoryStatus(directory, 'exists', 'available', 'El sitio web ya existe', 'Se publicará en');
-}
-
 function validateDirectoryLength(directory) {
     if (directory.length < 4 || directory.length > 35) {
         showPopup('El título debe tener entre 4 y 35 caracteres', 'exists');
         return false;
     }
     return true;
-}
-
-function fetchDirectoryStatus(directory, failureStatus, successStatus, failureMessage, successMessage) {
-    checkDirectoryExists(directory).then(exists => {
-        const message = exists ? `${failureMessage} conex.one/${directory}` : `${successMessage} conex.one/${directory}`;
-        const status = exists ? failureStatus : successStatus;
-        showPopup(message, status);
-    });
 }
 
 function checkDirectoryExists(directory) {
@@ -331,7 +392,13 @@ function dashboardMode() {
 
 function buyMode() {
     localStorage.removeItem('conex_data');
+    const dataToSave = {
+        title: document.getElementById('buyModeDirectoryInput').value.trim(),
+    };
+    localStorage.setItem('conex_data', JSON.stringify(dataToSave));
     loadEditorState();
+
+    closeDialog();
 
     document.getElementById('checkout-success-message').style.display = "none";
     document.querySelector("#paypal-button-container").style.display = "block";
@@ -380,6 +447,8 @@ function continueBuyMode() {
 }
 
 function openBuyModeDialog() {
+    document.getElementById("checkdir-error-message").style.display = "none";
+    document.getElementById("checkdir-success-message").style.display = "none";
     overlay.style.display = "block";
     dialog.style.display = "block";
     buyDialog.style.display = "block";
@@ -392,13 +461,23 @@ function openEditModeDialog() {
 }
 
 async function editMode(dir) {
-    closeDialog();
-    const success = await fetchAndStoreData(dir);
-    if (!success) {
-        console.error("Data could not be loaded, aborting UI changes");
-        return;
+    const errorMessageElement = document.getElementById('edit-error-message');
+    const conexData = JSON.parse(localStorage.getItem('conex_data'));
+
+    if (conexData?.directory === dir) {
+        console.log("Directory already loaded, skipping fetch.");
+    } else {
+        const success = await fetchAndStoreData(dir);
+        if (!success) {
+            errorMessageElement.innerHTML = "No se pudo cargar el sitio, asegúrate que estás digitando el enlace correcto.";
+            errorMessageElement.style.display = "block";
+            console.error("Data could not be loaded, aborting UI changes");
+            return;
+        }
     }
 
+    closeDialog();
+    errorMessageElement.style.display = "none";
     document.getElementById("buyButton").style.display = "none";
     document.getElementById("editButton").style.display = "block";
     const dashboard = document.getElementById('dashboard');
@@ -427,4 +506,78 @@ async function fetchAndStoreData(directoryName) {
         console.error('Error fetching and storing data:', error);
         return false;
     }
+}
+
+function updateSiteRequest() {
+    const conexData = JSON.parse(localStorage.getItem('conex_data'));
+    const directory = conexData?.directory;
+    successElement = document.getElementById('update-success-message');
+    errorElement = document.getElementById('update-error-message');
+
+    fetch('/api/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ directory: directory })
+    })
+    .then(response => {
+        if (response.status === 200) {
+            successElement.style.display = "block"
+            errorElement.style.display = "none"
+            successElement.innerHTML = "Se envió el código de autenticación de 6 dígitos a su correo electrónico.";
+        } else {
+            successElement.style.display = "none"
+            errorElement.style.display = "block"
+            errorElement.innerHTML = "Error enviando el código de confirmación a su correo, recuerde que puede solicitar el código solamente una vez cada minuto.";
+        }
+    })
+}
+
+function updateSiteConfirm(code) {
+    const conexData = JSON.parse(localStorage.getItem('conex_data'));
+    const directory = conexData?.directory;
+    const editorData = conexData?.editor_data;
+    const slogan = conexData?.slogan;
+
+    successElement = document.getElementById('update-success-message');
+    errorElement = document.getElementById('update-error-message');
+
+    if (!directory || !editorData) {
+        console.error('Directory or editor_data not found in localStorage');
+        return;
+    }
+
+    fetch('/api/confirm', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            directory: directory,
+            auth_code: code,
+            slogan: slogan,
+            editor_data: editorData
+        })
+    })
+    .then(response => {
+        if (response.status === 200) {
+            successElement.style.display = "block"
+            errorElement.style.display = "none"
+            successElement.innerHTML = "Se actualizó correctamente la información de su sitio, los cambios deberían verse reflejados en menos de 24 horas.";
+        } else {
+            successElement.style.display = "none"
+            errorElement.style.display = "block"
+            errorElement.innerHTML = "Error actualizando su sitio, por favor vuelva a intentarlo más tarde.";
+        }
+    })
+}
+
+function extractSitePath(url) {
+    if (!url.includes("conex.one")) {
+        return url;
+    }
+    const cleanUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/#.*$/, '');
+    const match = cleanUrl.match(/^conex\.one\/([^\/?#]+)\/?/);
+    return match ? match[1] : null;
 }

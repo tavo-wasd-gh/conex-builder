@@ -10,10 +10,6 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/editorjs-dark.css">
   </head>
-  <div id="status-popup" class="status-popup">
-    <span class="close-popup" onclick="hidePopup()">×</span>
-    <span id="status-message"></span>
-  </div>
   <div id="overlay"></div>
   <div id="dashboard">
     <div class="wave"></div>
@@ -45,13 +41,21 @@
     </div>
     <img id="banner" src="/static/svg/banner.svg" class="banner-image"/>
     <div class="desc">
-      <input type="text" id="title" maxlength="35" class="input-title" data-translate="sampleTitle" placeholder="" >
+      <h1 id="title" class="input-title"></h1>
       <textarea type="text" id="slogan" maxlength="100" class="input-slogan" data-translate="sampleSlogan" placeholder=""></textarea>
     </div>
   </div>
   <body>
     <div id="editorjs"></div>
   </body>
+  <footer class="footer">
+    <div class="footer-content">
+      <ul class="footer-links">
+        <li><a href="#contact">Contactar con soporte</a></li>
+      </ul>
+      <p data-translate="footer"></p>
+    </div>
+  </footer>
   <div class="floating-buttons-container" id="floatingButtons">
     <button class="floating-button" id="buyButton">
       <img src="/static/svg/check.svg">
@@ -86,9 +90,29 @@
       <div class="message error-message" id="checkout-error-message"></div>
       <div id="paypal-button-container"></div>
     </div>
+    <div id="buyDialog">
+      <h2 data-translate="buyDialogHeader"></h2>
+      <p data-translate="buyDialogParagraph"></p>
+      <div class="message success-message" id="checkdir-success-message"></div>
+      <div class="message error-message" id="checkdir-error-message"></div>
+      <input class="input-dialog" type="text" id="buyModeDirectoryInput" maxlength="35" placeholder="Mi Sitio"><br>
+      <button id="continueToBuyModeButton" class="right">
+        <span data-translate="continueToBuyModeButton"></span>
+      </button>
+    </div>
+    <div id="updateContentDialog">
+      <h2 data-translate="updateContentDialogHeader"></h2>
+      <p data-translate="updateContentDialogParagraph"></p>
+      <div class="message success-message" id="update-success-message"></div>
+      <div class="message error-message" id="update-error-message"></div>
+      <input data-translate="tempCodePlaceholder" class="input-dialog" type="number" id="updateContentCodeInput" min="0" max="999999" placeholder=""><br>
+      <button data-translate="requestChangesButton" id="requestChangesButton"></button>
+      <button data-translate="confirmChangesButton" id="confirmChangesButton"></button>
+    </div>
     <div id="editDialog">
       <h2 data-translate="editDialogHeader"></h2>
       <p data-translate="editDialogParagraph"></p>
+      <div class="message error-message" id="edit-error-message"></div>
       <input class="input-dialog" type="text" id="editModeDirectoryInput" name="title" maxlength="35" placeholder="https://conex.one/mi-sitio"><br>
       <button id="continueToEditModeButton" class="right">
         <span data-translate="continueToEditModeButton"></span>

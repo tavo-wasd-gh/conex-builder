@@ -119,10 +119,12 @@ func RegisterSitePayment(db *sql.DB, capture Capture, cart ConexData) error {
 	return nil
 }
 
-func UpdateSite(db *sql.DB, pkey int, editorData json.RawMessage) error {
+func UpdateSite(db *sql.DB, pkey int, editorData json.RawMessage, slogan string) error {
 	if _, err := db.Exec(`
-		UPDATE sites SET raw = $1 WHERE id = $2
-		`, editorData, pkey); err != nil {
+		UPDATE sites
+		SET raw = $1, slogan = $2, status = 'diff'
+		WHERE id = $3
+		`, editorData, slogan, pkey); err != nil {
 		return fmt.Errorf("%s: %v", errDBUpdateRaw, err)
 	}
 
@@ -130,15 +132,27 @@ func UpdateSite(db *sql.DB, pkey int, editorData json.RawMessage) error {
 }
 
 func UpdateSiteAuth(db *sql.DB, folder string, code string) (string, error) {
-	valid := time.Now().Add(5 * time.Minute)
+	var valid sql.NullTime
+	if err := db.QueryRow(`
+		SELECT valid
+		FROM sites
+		WHERE folder = $1
+	`, folder).Scan(&valid); err != nil {
+		return "", fmt.Errorf("error fetching valid timestamp: %v", err)
+	}
 
+	if valid.Valid && valid.Time.After(time.Now().Add(4*time.Minute)) {
+		return "", fmt.Errorf("valid timestamp is still active, cannot update")
+	}
+
+	newValid := time.Now().Add(5 * time.Minute)
 	var email string
 	if err := db.QueryRow(`
 		UPDATE sites
 		SET auth = $1, valid = $2
 		WHERE folder = $3
 		RETURNING email;
-		`, code, valid, folder).Scan(&email); err != nil {
+		`, code, newValid, folder).Scan(&email); err != nil {
 		return "", fmt.Errorf("%s: %v", errDBUpdateSiteAuth, err)
 	}
 

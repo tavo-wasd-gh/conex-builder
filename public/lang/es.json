@@ -6,6 +6,14 @@
   "editModeButton": "Editar sitio existente",
   "editModeButtonDisclaimer": "Limpiará el progreso actual para cargar un sitio existente",
   "continueEditingModeButton": "Continuar editando",
+  "buyDialogHeader": "Diseñar un nuevo sitio web",
+  "buyDialogParagraph": "Ingresa el nombre del sitio y revisa el enlace en el que se publicará una vez adquirido.",
+  "updateContentDialogHeader": "Actualizar mi sitio",
+  "updateContentDialogParagraph": "Para actualizar el sitio web, requerimos confirmar que el sitio es suyo. Para esto, enviaremos un correo electrónico a la cuenta de correo con la que compró este sitio web, con un código temporal de 6 dígitos que expirará en 5 minutos luego de ser enviado. Por favor, presione el botón para enviar el código y luego compruebe su identidad digitándolo en la casilla.",
+  "tempCodePlaceholder": "Código de 6 dígitos enviado a su correo",
+  "requestChangesButton": "Enviar correo con el pin",
+  "confirmChangesButton": "Verificar pin y actualizar sitio",
+  "continueToBuyModeButton": "Empezar a diseñar",
   "editDialogHeader": "Editar un sitio existente",
   "editDialogParagraph": "El sitio ya debe estar registrado en conex.one para poder cargarlo localmente.",
   "continueToEditModeButton": "Editar este sitio",
@@ -18,7 +26,7 @@
   "supportEmail": "Correo electrónico: soporte@conex.one",
   "supportPhone": "",
   "supportSchedule": "Horario de atención: L-V: 9:00 a.m. - 6:00 p.m.",
-  "sampleTitle": "[Título de ejemplo]",
+  "sampleTitle": "Mi Sitio",
   "sampleSlogan": "[Slogan o breve descripción]",
   "sampleHeader": "Acerca de [Empres]",
   "sampleParagraph": "En [Nombre de Tu Empresa], nos dedicamos a ofrecer [tu servicio/producto] de la más alta calidad con un servicio al cliente excepcional. Nuestro equipo de expertos se asegura de que cada aspecto de tu experiencia sea manejado con profesionalismo y cuidado.",
@@ -33,5 +41,6 @@
   "sampleTable23": "1000",
   "sampleTable31": "Laminado",
   "sampleTable32": "Breve descripción",
-  "sampleTable33": "2000"
+  "sampleTable33": "2000",
+  "footer": "Copyright (C) 2024 Conex"
 }
