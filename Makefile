@@ -45,4 +45,5 @@ clean:
 	rm -f ${BIN}
 
 clean-mods:
+	go clean -modcache
 	rm -f ${SRCDIR}/go.*
