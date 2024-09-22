@@ -271,7 +271,7 @@ function validateDirectoryLength(directory) {
 }
 
 function checkDirectoryExists(directory) {
-    return fetch(`/api/directory/${encodeURIComponent(directory)}`)
+    return fetch(`https://api.conex.one/api/directory/${encodeURIComponent(directory)}`)
         .then(response => response.json())
         .then(data => data.exists)
         .catch(error => {
@@ -339,7 +339,7 @@ function handleImageUpload() {
         loader.style.display = 'inline-block';
         imageIcon.style.display = 'none';
 
-        fetch('/api/upload', {
+        fetch('https://api.conex.one/api/upload', {
             method: 'POST',
             body: formData,
         }).then(response => response.json()).then(data => {
@@ -491,7 +491,7 @@ async function editMode(dir) {
 
 async function fetchAndStoreData(directoryName) {
     try {
-        const response = await fetch(`/api/fetch/${encodeURIComponent(directoryName)}`);
+        const response = await fetch(`https://api.conex.one/api/fetch/${encodeURIComponent(directoryName)}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch data for directory: ${directoryName}`);
         }
@@ -514,7 +514,7 @@ function updateSiteRequest() {
     successElement = document.getElementById('update-success-message');
     errorElement = document.getElementById('update-error-message');
 
-    fetch('/api/update', {
+    fetch('https://api.conex.one/api/update', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -548,7 +548,7 @@ function updateSiteConfirm(code) {
         return;
     }
 
-    fetch('/api/confirm', {
+    fetch('https://api.conex.one/api/confirm', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

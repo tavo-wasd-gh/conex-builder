@@ -10,7 +10,7 @@ paypal.Buttons({
         const requestData = {
             directory: savedData.directory,
         };
-        const response = await fetch("/api/orders", {
+        const response = await fetch("https://api.conex.one/api/orders", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -55,7 +55,7 @@ paypal.Buttons({
                 editor_data: savedData.editor_data
             };
 
-            const response = await fetch(`/api/orders/${data.orderID}/capture`, {
+            const response = await fetch(`https://api.conex.one/api/orders/${data.orderID}/capture`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
