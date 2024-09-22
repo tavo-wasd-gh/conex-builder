@@ -1,5 +1,5 @@
-const PayPalSDK = "https://sandbox.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&enable-funding=card&disable-funding=paylater,venmo"
-// const PayPalSDK = "https://paypal.com/sdk/js?client-id=AUm4S44vdasfvVjG6oaQBc9ivbI92ofrfvL8-ItRjwSgtxuJyzkRRhKLabXMbehC7t-nxGdqhD58qasD&components=buttons&enable-funding=card&disable-funding=paylater,venmo"
+// const PayPalSDK = "https://sandbox.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&enable-funding=card&disable-funding=paylater,venmo"
+const PayPalSDK = "https://paypal.com/sdk/js?client-id=AUm4S44vdasfvVjG6oaQBc9ivbI92ofrfvL8-ItRjwSgtxuJyzkRRhKLabXMbehC7t-nxGdqhD58qasD&components=buttons&enable-funding=card&disable-funding=paylater,venmo"
 
 const EditorJSComponents = [
     "https://cdn.jsdelivr.net/npm/@editorjs/header@latest",
