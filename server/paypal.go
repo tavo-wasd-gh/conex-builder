@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -191,8 +190,6 @@ func CaptureOrder(orderID string) (Capture, Receipt, error) {
 	var receipt Receipt
 
 	body, err := io.ReadAll(raw.Body)
-	log.Printf("Raw Body: %s", string(body))
-
 	if err != nil {
 		return Capture{}, Receipt{}, fmt.Errorf("%s: %v", errCaptureOrderResp, err)
 	}
