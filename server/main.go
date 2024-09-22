@@ -69,7 +69,7 @@ func main() {
 		returnURL    = os.Getenv("RETURN_URL")
 		cancelURL    = os.Getenv("CANCEL_URL")
 		port         = os.Getenv("PORT")
-		// price        = os.Getenv("PRICE")
+		amount       = os.Getenv("PRICE")
 	)
 
 	if baseURL == "" ||
@@ -124,7 +124,7 @@ func main() {
 
 	s3Client = s3.NewFromConfig(cfg)
 
-	http.HandleFunc("/api/orders", CreateOrderHandler(db))
+	http.HandleFunc("/api/orders", CreateOrderHandler(db, amount))
 	http.HandleFunc("/api/orders/", CaptureOrderHandler(db))
 	http.HandleFunc("/api/update", UpdateSiteHandler(db))
 	http.HandleFunc("/api/confirm", ConfirmChangesHandler(db))
@@ -169,7 +169,7 @@ func fatal(err error, notice string) {
 	log.Fatalf("%s: %v", notice, err)
 }
 
-func CreateOrderHandler(db *sql.DB) http.HandlerFunc {
+func CreateOrderHandler(db *sql.DB, amount string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var cart struct {
 			Directory string `json:"directory"`
@@ -191,7 +191,7 @@ func CreateOrderHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		orderID, err := CreateOrder()
+		orderID, err := CreateOrder(amount)
 		if err != nil {
 			httpErrorAndLog(w, err, errCreateOrder, "Error creating order")
 			return

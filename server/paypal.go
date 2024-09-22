@@ -91,7 +91,7 @@ func Token() (string, error) {
 	return response.AccessToken, nil
 }
 
-func CreateOrder() (string, error) {
+func CreateOrder(amount string) (string, error) {
 	token, err := Token()
 	if err != nil {
 		return "", fmt.Errorf("%s: %v", errToken, err)
@@ -129,7 +129,7 @@ func CreateOrder() (string, error) {
 		Intent: "CAPTURE",
 		PurchaseUnits: []PurchaseUnits{{Amount: Amount{
 			CurrencyCode: "USD",
-			Value:        os.Getenv("PRICE"),
+			Value:        amount,
 		}}},
 		PaymentSource: PaymentSource{Paypal: Paypal{Address: Address{
 			CountryCode: "CR",
