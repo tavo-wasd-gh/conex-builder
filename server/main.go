@@ -131,7 +131,7 @@ func main() {
 	http.HandleFunc("/api/directory/", VerifyDirectoryHandler(db))
 	http.HandleFunc("/api/fetch/", FetchSiteHandler(db))
 	http.HandleFunc("/api/upload", UploadFileHandler(s3Client, endpoint, apiEndpoint, apiToken, bucketName, publicEndpoint))
-	// http.Handle("/", http.FileServer(http.Dir("./public")))
+	http.Handle("/", http.FileServer(http.Dir("./public")))
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
@@ -171,6 +171,12 @@ func fatal(err error, notice string) {
 
 func CreateOrderHandler(db *sql.DB, amount string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		enableCORS(w)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		var cart struct {
 			Directory string `json:"directory"`
 		}
@@ -210,6 +216,12 @@ func CreateOrderHandler(db *sql.DB, amount string) http.HandlerFunc {
 
 func CaptureOrderHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		enableCORS(w)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		errClientNotice := "Error capturing order"
 
 		var cart ConexData
@@ -249,6 +261,12 @@ func CaptureOrderHandler(db *sql.DB) http.HandlerFunc {
 
 func UpdateSiteHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		enableCORS(w)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		errClientNotice := "Error handling update request"
 
 		var cart struct {
@@ -278,6 +296,12 @@ func UpdateSiteHandler(db *sql.DB) http.HandlerFunc {
 
 func ConfirmChangesHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		enableCORS(w)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		errClientNotice := "Error handling confirm changes request"
 
 		var cart struct {
@@ -308,6 +332,12 @@ func ConfirmChangesHandler(db *sql.DB) http.HandlerFunc {
 
 func VerifyDirectoryHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		enableCORS(w)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		errClientNotice := "Error verifying directory against db"
 
 		path := strings.TrimPrefix(r.URL.Path, "/api/directory/")
@@ -338,6 +368,12 @@ func VerifyDirectoryHandler(db *sql.DB) http.HandlerFunc {
 func UploadFileHandler(s3Client *s3.Client, endpoint string, apiEndpoint string,
 	apiToken string, bucketName string, publicEndpoint string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		enableCORS(w)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		if err := r.ParseMultipartForm(10 << 20); err != nil {
 			httpErrorAndLog(w, err, "Unable to parse form", "Unable to parse form")
 			return
@@ -396,6 +432,12 @@ func UploadFileHandler(s3Client *s3.Client, endpoint string, apiEndpoint string,
 
 func FetchSiteHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		enableCORS(w)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		errClientNotice := "Error fetching site from db"
 
 		path := strings.TrimPrefix(r.URL.Path, "/api/fetch/")
@@ -417,4 +459,10 @@ func FetchSiteHandler(db *sql.DB) http.HandlerFunc {
 		json.NewEncoder(w).Encode(siteData)
 		return
 	}
+}
+
+func enableCORS(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 }
