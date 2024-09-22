@@ -1,4 +1,5 @@
-const PayPalSDK = "https://sandbox.paypal.com/sdk/js?client-id=AUm4S44vdasfvVjG6oaQBc9ivbI92ofrfvL8-ItRjwSgtxuJyzkRRhKLabXMbehC7t-nxGdqhD58qasD&components=buttons&enable-funding=card&disable-funding=paylater,venmo"
+const PayPalSDK = "https://sandbox.paypal.com/sdk/js?client-id=AcCW43LI1S6lLQgtLkF4V8UOPfmXcqXQ8xfEl41hRuMxSskR2jkWNwQN6Ab1WK7E2E52GNaoYBHqgIKd&components=buttons&enable-funding=card&disable-funding=paylater,venmo"
+// const PayPalSDK = "https://paypal.com/sdk/js?client-id=AUm4S44vdasfvVjG6oaQBc9ivbI92ofrfvL8-ItRjwSgtxuJyzkRRhKLabXMbehC7t-nxGdqhD58qasD&components=buttons&enable-funding=card&disable-funding=paylater,venmo"
 
 const EditorJSComponents = [
     "https://cdn.jsdelivr.net/npm/@editorjs/header@latest",
@@ -117,15 +118,44 @@ function initializeEventListeners() {
     // // Mode switching
     document.getElementById('buyModeButton').addEventListener('click', openBuyModeDialog);
     document.getElementById('editModeButton').addEventListener('click', openEditModeDialog);
+
     document.getElementById("continueToBuyModeButton").addEventListener('click', async () => {
-        const directory = sanitizeDirectoryTitle(document.getElementById("buyModeDirectoryInput").value);
-        const exists = await checkDirectoryExists(directory);
-        if (exists) {
-            document.getElementById("checkdir-error-message").style.display = "block";
-            document.getElementById("checkdir-error-message").innerHTML = `El sitio https://conex.one/${directory} ya existe.`;
-        } else {
-            document.getElementById("checkdir-error-message").style.display = "none";
-            buyMode(directory);
+        const button = document.getElementById("continueToBuyModeButton");
+        const directoryInput = document.getElementById("buyModeDirectoryInput");
+        const errorMessage = document.getElementById("checkdir-error-message");
+        const directory = sanitizeDirectoryTitle(directoryInput.value);
+
+
+        const originalBuyButtonHTML = button.innerHTML;
+        button.innerHTML = '<span class="loader"></span>';
+        button.disabled = true;
+
+        let timeout = setTimeout(() => {
+            button.innerHTML = originalBuyButtonHTML;
+            button.disabled = false;
+            errorMessage.style.display = "block";
+            errorMessage.innerHTML = `Revisar la disponibilidad del sitio tardó mucho tiempo, intentalo más tarde.`;
+        }, 10000);
+
+        try {
+            const exists = await checkDirectoryExists(directory);
+
+            clearTimeout(timeout);
+
+            if (exists) {
+                errorMessage.style.display = "block";
+                errorMessage.innerHTML = `El sitio https://conex.one/${directory} ya existe.`;
+            } else {
+                errorMessage.style.display = "none";
+                buyMode(directory);
+            }
+        } catch (error) {
+            clearTimeout(timeout);
+            errorMessage.style.display = "block";
+            errorMessage.innerHTML = `Error: Could not check the site. Please try again.`;
+        } finally {
+            button.innerHTML = originalBuyButtonHTML;
+            button.disabled = false;
         }
     });
 
@@ -166,14 +196,6 @@ function initializeEventListeners() {
             console.error('Invalid code. Please enter a 6-digit number.');
         }
     });
-
-    const titleElement = document.getElementById('buyModeDirectoryInput');
-    titleElement.addEventListener('input', debounce(function() {
-        const directory = titleElement.value.trim();
-        if (directory.length > 0) {
-            validateDirectory(directory);
-        }
-    }, 500));  // 500ms debounce
 }
 
 function openDialog(content) {
@@ -181,14 +203,6 @@ function openDialog(content) {
     content.style.display = "block";
     overlay.style.display = "block";
     floatingButtons.style.display = "none";
-}
-
-function debounce(func, delay) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), delay);
-    };
 }
 
 function closeDialog() {
