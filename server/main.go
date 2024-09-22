@@ -131,7 +131,7 @@ func main() {
 	http.HandleFunc("/api/directory/", VerifyDirectoryHandler(db))
 	http.HandleFunc("/api/fetch/", FetchSiteHandler(db))
 	http.HandleFunc("/api/upload", UploadFileHandler(s3Client, endpoint, apiEndpoint, apiToken, bucketName, publicEndpoint))
-	http.Handle("/", http.FileServer(http.Dir("./public")))
+	// http.Handle("/", http.FileServer(http.Dir("./public")))
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
