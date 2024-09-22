@@ -25,7 +25,7 @@ function initializeEditor(conex_data) {
                 class: ImageTool,
                 config: {
                     endpoints: {
-                        byFile: `${window.location.origin}/api/upload`,
+                        byFile: `https://api.conex.one/api/upload`,
                     },
                     field: 'file',
                     types: 'image/*',
