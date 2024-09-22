@@ -6,6 +6,7 @@ SRC = ${SRCDIR}/main.go \
       ${SRCDIR}/auth.go \
       ${SRCDIR}/bucket.go \
 
+GO = go
 GOFILES = ${SRCDIR}/go.sum ${SRCDIR}/go.mod
 GOMODS = github.com/joho/godotenv \
 	 github.com/lib/pq \
@@ -18,7 +19,7 @@ GOMODS = github.com/joho/godotenv \
 all: ${BIN} fmt
 
 ${BIN}: ${SRC} ${GOFILES}
-	(cd ${SRCDIR} && go build -o ../${BIN})
+	(cd ${SRCDIR} && ${GO} build -o ../${BIN})
 
 fmt: ${SRC}
 	@diff=$$(gofmt -d $^); \
@@ -28,8 +29,8 @@ fmt: ${SRC}
 	fi
 
 ${GOFILES}:
-	(cd ${SRCDIR} && go mod init ${BIN})
-	(cd ${SRCDIR} && go get ${GOMODS})
+	(cd ${SRCDIR} && ${GO} mod init ${BIN})
+	(cd ${SRCDIR} && ${GO} get ${GOMODS})
 
 start: ${BIN}
 	@./$< &
