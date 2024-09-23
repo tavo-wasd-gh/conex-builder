@@ -132,6 +132,12 @@ function initializeEventListeners() {
             errorMessage.innerHTML = `Revisar la disponibilidad del sitio tardó mucho tiempo, intentalo más tarde.`;
         }, 10000);
 
+        if (directory.length < 4 || directory.length > 35) {
+            errorMessage.style.display = "block";
+            errorMessage.innerHTML = `El nombre del sitio debe tener entre 4 y 35 caracteres.`;
+            return;
+        }
+
         try {
             const exists = await checkDirectoryExists(directory);
 
@@ -154,14 +160,14 @@ function initializeEventListeners() {
         }
     });
 
-  document.getElementById('buyModeDirectoryInput').addEventListener('input', function() {
-    const input = this.value.trim();
-    const sanitizedDirectory = sanitizeDirectoryTitle(input);
-    const previewElement = document.getElementById('checkdir-preview');
+    document.getElementById('buyModeDirectoryInput').addEventListener('input', function() {
+        const input = this.value.trim();
+        const sanitizedDirectory = sanitizeDirectoryTitle(input);
+        const previewElement = document.getElementById('checkdir-preview');
 
-    previewElement.style.display = "block"
-    previewElement.innerHTML = `Su sitio se publicará en:<br><a href="#">https://conex.one/${sanitizedDirectory}</a>`;
-  });
+        previewElement.style.display = "block"
+        previewElement.innerHTML = `Su sitio se publicará en:<br><a href="#">https://conex.one/${sanitizedDirectory}</a>`;
+    });
 
     document.getElementById("continueToEditModeButton").addEventListener('click', () =>
         editMode(extractSitePath(document.getElementById("editModeDirectoryInput").value))
@@ -551,17 +557,17 @@ function updateSiteRequest() {
         },
         body: JSON.stringify({ directory: directory })
     })
-    .then(response => {
-        if (response.status === 200) {
-            successElement.style.display = "block"
-            errorElement.style.display = "none"
-            successElement.innerHTML = "Se envió el código de autenticación de 6 dígitos a su correo electrónico.";
-        } else {
-            successElement.style.display = "none"
-            errorElement.style.display = "block"
-            errorElement.innerHTML = "Error enviando el código de confirmación a su correo, recuerde que puede solicitar el código solamente una vez cada minuto.";
-        }
-    })
+        .then(response => {
+            if (response.status === 200) {
+                successElement.style.display = "block"
+                errorElement.style.display = "none"
+                successElement.innerHTML = "Se envió el código de autenticación de 6 dígitos a su correo electrónico.";
+            } else {
+                successElement.style.display = "none"
+                errorElement.style.display = "block"
+                errorElement.innerHTML = "Error enviando el código de confirmación a su correo, recuerde que puede solicitar el código solamente una vez cada minuto.";
+            }
+        })
 }
 
 function updateSiteConfirm(code) {
@@ -590,17 +596,17 @@ function updateSiteConfirm(code) {
             editor_data: editorData
         })
     })
-    .then(response => {
-        if (response.status === 200) {
-            successElement.style.display = "block"
-            errorElement.style.display = "none"
-            successElement.innerHTML = "Se actualizó correctamente la información de su sitio, los cambios deberían verse reflejados en menos de 24 horas.";
-        } else {
-            successElement.style.display = "none"
-            errorElement.style.display = "block"
-            errorElement.innerHTML = "Error actualizando su sitio, por favor vuelva a intentarlo más tarde.";
-        }
-    })
+        .then(response => {
+            if (response.status === 200) {
+                successElement.style.display = "block"
+                errorElement.style.display = "none"
+                successElement.innerHTML = "Se actualizó correctamente la información de su sitio, los cambios deberían verse reflejados en menos de 24 horas.";
+            } else {
+                successElement.style.display = "none"
+                errorElement.style.display = "block"
+                errorElement.innerHTML = "Error actualizando su sitio, por favor vuelva a intentarlo más tarde.";
+            }
+        })
 }
 
 function extractSitePath(url) {
