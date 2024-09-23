@@ -523,6 +523,16 @@ async function editMode(dir) {
     setTimeout(() => {
         dashboard.style.display = 'none';
     }, 500);
+
+    const dueDate = await getDueDate(dir);
+    const previewElement = document.getElementById('checkdir-duedate');
+    previewElement.style.display = "block"
+
+    if (dueDate) {
+        previewElement.innerHTML = `Fecha de término actual: ${dueDate}`;
+    } else {
+        previewElement.innerHTML = "No se pudo cargar la fecha de término.";
+    }
 }
 
 async function fetchAndStoreData(directoryName) {
@@ -616,4 +626,19 @@ function extractSitePath(url) {
     const cleanUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/#.*$/, '');
     const match = cleanUrl.match(/^conex\.one\/([^\/?#]+)\/?/);
     return match ? match[1] : null;
+}
+
+async function getDueDate(directory) {
+    try {
+        const response = await fetch(`https://api.conex.one/api/duedate/${directory}`);
+        if (!response.ok) {
+            throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.due;
+    } catch (error) {
+        console.error("Failed to fetch due date:", error);
+        return null;
+    }
 }

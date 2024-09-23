@@ -230,3 +230,21 @@ func FetchSite(db *sql.DB, folder string) (ConexData, error) {
 
 	return siteData, nil
 }
+
+func DueDate(db *sql.DB, folder string) (time.Time, error) {
+	if len(folder) <= 3 {
+		return time.Time{}, fmt.Errorf("folder name must be longer than 3 characters")
+	}
+
+	var due time.Time
+	if err := db.QueryRow(`
+		SELECT due FROM sites WHERE folder = $1
+		`, folder).Scan(&due); err != nil {
+		if err == sql.ErrNoRows {
+			return time.Time{}, fmt.Errorf("no due date found for folder: %s", folder)
+		}
+		return time.Time{}, fmt.Errorf("error checking due date: %v", err)
+	}
+
+	return due, nil
+}

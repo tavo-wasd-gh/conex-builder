@@ -132,6 +132,7 @@ func main() {
 	http.HandleFunc("/api/directory/", VerifyDirectoryHandler(db))
 	http.HandleFunc("/api/fetch/", FetchSiteHandler(db))
 	http.HandleFunc("/api/upload", UploadFileHandler(s3Client, endpoint, apiEndpoint, apiToken, bucketName, publicEndpoint))
+	http.HandleFunc("/api/duedate/", VerifyDueDateHandler(db))
 	// http.Handle("/", http.FileServer(http.Dir("./public")))
 
 	stop := make(chan os.Signal, 1)
@@ -458,6 +459,42 @@ func FetchSiteHandler(db *sql.DB) http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(siteData)
+		return
+	}
+}
+
+func VerifyDueDateHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		enableCORS(w)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		errClientNotice := "Error verifying duedate against db"
+
+		path := strings.TrimPrefix(r.URL.Path, "/api/duedate/")
+		parts := strings.Split(path, "/")
+		folder := parts[0]
+		if folder == "" {
+			httpErrorAndLog(w, nil, "Error getting directory", errClientNotice)
+			return
+		}
+
+		var response struct {
+			Due time.Time `json:"due"`
+		}
+
+		due, err := DueDate(db, folder)
+		if err != nil {
+			httpErrorAndLog(w, err, "Error getting due date", errClientNotice)
+			return
+		} else {
+			response.Due = due
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
 		return
 	}
 }
