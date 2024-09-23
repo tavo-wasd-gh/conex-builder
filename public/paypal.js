@@ -204,7 +204,7 @@ paypal.Buttons({
                     orderData,
                     JSON.stringify(orderData, null, 2),
                 );
-                const dueDate = await getDueDate(dir);
+                const dueDate = await getDueDate(directory);
                 const previewElement = document.getElementById('checkdir-duedate');
                 previewElement.style.display = "block"
 
