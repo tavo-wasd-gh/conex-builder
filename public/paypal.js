@@ -136,6 +136,14 @@ paypal.Buttons({
             directory: savedData.directory,
         };
 
+        const response = await fetch("https://api.conex.one/api/extend", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+        });
+
         const orderData = await response.json();
 
         if (orderData.id) {
@@ -196,6 +204,15 @@ paypal.Buttons({
                     orderData,
                     JSON.stringify(orderData, null, 2),
                 );
+                const dueDate = await getDueDate(dir);
+                const previewElement = document.getElementById('checkdir-duedate');
+                previewElement.style.display = "block"
+
+                if (dueDate) {
+                    previewElement.innerHTML = `Fecha de término actualizada: ${dueDate}`;
+                } else {
+                    previewElement.innerHTML = "No se pudo cargar la fecha de término.";
+                }
             }
         } catch (error) {
             console.error(error);

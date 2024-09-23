@@ -126,6 +126,7 @@ func main() {
 	s3Client = s3.NewFromConfig(cfg)
 
 	http.HandleFunc("/api/orders", CreateOrderHandler(db, amount))
+	http.HandleFunc("/api/extend", ExtendOrderHandler(db, amount))
 	http.HandleFunc("/api/orders/", CaptureOrderHandler(db))
 	http.HandleFunc("/api/update", UpdateSiteHandler(db))
 	http.HandleFunc("/api/confirm", ConfirmChangesHandler(db))
@@ -188,7 +189,7 @@ func CreateOrderHandler(db *sql.DB, amount string) http.HandlerFunc {
 		}
 
 		if len(cart.Directory) > 35 {
-			http.Error(w, "Site already exists", http.StatusConflict)
+			http.Error(w, "Site title is too long", http.StatusConflict)
 			log.Printf("%s: %v", "Site title is too long", nil)
 			return
 		}
@@ -196,6 +197,51 @@ func CreateOrderHandler(db *sql.DB, amount string) http.HandlerFunc {
 		if err := AvailableSite(db, cart.Directory); err != nil {
 			http.Error(w, "Site already exists", http.StatusConflict)
 			log.Printf("%s: %v", "Site already exists", err)
+			return
+		}
+
+		orderID, err := CreateOrder(amount)
+		if err != nil {
+			httpErrorAndLog(w, err, errCreateOrder, "Error creating order")
+			return
+		}
+
+		var response struct {
+			ID string `json:"id"`
+		}
+		response.ID = orderID
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+}
+
+func ExtendOrderHandler(db *sql.DB, amount string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		enableCORS(w)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		var cart struct {
+			Directory string `json:"directory"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&cart); err != nil {
+			httpErrorAndLog(w, err, errReadBody, "Error decoding response")
+			return
+		}
+
+		if len(cart.Directory) > 35 {
+			http.Error(w, "Site title is too long", http.StatusConflict)
+			log.Printf("%s: %v", "Site title is too long", nil)
+			return
+		}
+
+		if exists := AvailableSite(db, cart.Directory); exists == nil {
+			http.Error(w, "Site doesn't exist", http.StatusConflict)
+			log.Printf("%s: %v", "Site doesn't exist", exists)
 			return
 		}
 
