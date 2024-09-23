@@ -54,6 +54,7 @@ type ConexData struct {
 	Banner     string          `json:"banner"`
 	Title      string          `json:"title"`
 	Slogan     string          `json:"slogan"`
+	Tags       string          `json:"tags"`
 	EditorData json.RawMessage `json:"editor_data"`
 }
 

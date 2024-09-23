@@ -57,6 +57,7 @@ func RegisterSitePayment(db *sql.DB, capture Capture, cart ConexData) error {
 		directory  string
 		title      string
 		slogan     string
+		tags       string
 		banner     string
 		editorData json.RawMessage
 	)
@@ -79,6 +80,7 @@ func RegisterSitePayment(db *sql.DB, capture Capture, cart ConexData) error {
 	directory = cart.Directory
 	title = cart.Title
 	slogan = cart.Slogan
+	tags = cart.Tags
 	banner = cart.Banner
 	editorData = cart.EditorData
 
@@ -90,12 +92,12 @@ func RegisterSitePayment(db *sql.DB, capture Capture, cart ConexData) error {
 	if newSite == sql.ErrNoRows {
 		if err := db.QueryRow(`
 			INSERT INTO sites
-			(folder, status, due, name, sur, email, phone, code, title, slogan, banner, raw)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+			(folder, status, due, name, sur, email, phone, code, title, slogan, tags, banner, raw)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 			RETURNING id
 			`, directory, wstatus, due,
 			name, surname, email, phone, country, title, slogan,
-			banner, editorData).Scan(&pkey); err != nil {
+			tags, banner, editorData).Scan(&pkey); err != nil {
 			return fmt.Errorf("%s: %v", errDBRegisterSite, err)
 		}
 	} else {

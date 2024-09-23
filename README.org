@@ -35,6 +35,7 @@ CREATE TABLE sites (
     code   VARCHAR(2),
     title  VARCHAR(35) NOT NULL,
     slogan VARCHAR(100),
+    tags   TEXT,
     banner TEXT,
     raw    JSONB NOT NULL,
     auth   INTEGER,

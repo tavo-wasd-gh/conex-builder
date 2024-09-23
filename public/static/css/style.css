@@ -466,10 +466,15 @@ a {
   color: #721c24;
 }
 
+.neutral-message {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
 .loader {
   width: 1.5em;
   height: 1.5em;
-  border: 0.2em solid #FFF;
+  border: 0.2em solid var(--color);
   border-bottom-color: transparent;
   border-radius: 50%;
   display: inline-block;

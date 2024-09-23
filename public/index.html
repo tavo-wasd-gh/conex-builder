@@ -36,7 +36,7 @@
       <input type="file" id="uploadBannerBtn" class="tool-button-input" accept="image/*">
       <label for="uploadBannerBtn" class="tool-button">
         <img src="/static/svg/image.svg" alt="Edit Icon" class="icon">
-        <span class="loader"></span>
+        <span class="loader" style="border: 0.2em solid #fff"></span>
       </label>
     </div>
     <img id="banner" src="/static/svg/banner.svg" class="banner-image"/>
@@ -103,7 +103,10 @@
       <p data-translate="buyDialogParagraph"></p>
       <div class="message success-message" id="checkdir-success-message"></div>
       <div class="message error-message" id="checkdir-error-message"></div>
+      <div class="message neutral-message" id="checkdir-preview"></div>
       <input class="input-dialog" type="text" id="buyModeDirectoryInput" maxlength="35" placeholder="Mi Sitio"><br>
+      <p data-translate="buyDialogTags"></p>
+      <input class="input-dialog" type="text" id="buyModeTagsInput" data-translate="buyModeTagsInput" placeholder=""><br>
       <button id="continueToBuyModeButton" class="right">
         <span data-translate="continueToBuyModeButton"></span>
       </button>

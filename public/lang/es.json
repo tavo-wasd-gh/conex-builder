@@ -8,6 +8,8 @@
   "continueEditingModeButton": "Continuar editando",
   "buyDialogHeader": "Diseñar un nuevo sitio web",
   "buyDialogParagraph": "Ingresa el nombre del sitio y revisa el enlace en el que se publicará una vez adquirido.",
+  "buyDialogTags": "Las etiquetas son palabras clave que ayudan a las personas a encontrar tu sitio, por ejemplo, las etiquetas de una página web relacionada al turismo: vacaciones, paseos, viajes, destinos, tours",
+  "buyModeTagsInput": "vacaciones  paseos  viajes  destinos  tours",
   "updateContentDialogHeader": "Actualizar mi sitio",
   "updateContentDialogParagraph": "Para actualizar el sitio web, requerimos confirmar que el sitio es suyo. Para esto, enviaremos un correo electrónico a la cuenta de correo con la que compró este sitio web, con un código temporal de 6 dígitos que expirará en 5 minutos luego de ser enviado. Por favor, presione el botón para enviar el código y luego compruebe su identidad digitándolo en la casilla.",
   "tempCodePlaceholder": "Código de 6 dígitos enviado a su correo",

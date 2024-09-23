@@ -154,6 +154,15 @@ function initializeEventListeners() {
         }
     });
 
+  document.getElementById('buyModeDirectoryInput').addEventListener('input', function() {
+    const input = this.value.trim();
+    const sanitizedDirectory = sanitizeDirectoryTitle(input);
+    const previewElement = document.getElementById('checkdir-preview');
+
+    previewElement.style.display = "block"
+    previewElement.innerHTML = `Su sitio se publicará en:<br><a href="#">https://conex.one/${sanitizedDirectory}</a>`;
+  });
+
     document.getElementById("continueToEditModeButton").addEventListener('click', () =>
         editMode(extractSitePath(document.getElementById("editModeDirectoryInput").value))
     );
@@ -372,15 +381,12 @@ function loadLanguage(lang) {
     fetch(`./lang/${lang}.json`)
         .then(response => response.json())
         .then(translations => {
-            // Find all elements with a 'data-translate' attribute
             document.querySelectorAll('[data-translate]').forEach(element => {
                 const translationKey = element.getAttribute('data-translate');
 
-                // Check if the element is an input field (update placeholder)
                 if (element.tagName.toLowerCase() === 'input' || element.tagName.toLowerCase() === 'textarea') {
                     element.placeholder = translations[translationKey];
                 } else {
-                    // Update text content for non-input elements
                     element.innerText = translations[translationKey];
                 }
             });
@@ -401,10 +407,25 @@ function dashboardMode() {
 
 function buyMode() {
     localStorage.removeItem('conex_data');
+    title = document.getElementById('buyModeDirectoryInput').value.trim();
+    directory = sanitizeDirectoryTitle(title);
+
+    let tagsInput = document.getElementById('buyModeTagsInput').value.trim();
+    let tags = tagsInput
+        .split(/[\s,]+/)
+        .map(tag => tag.trim().toLowerCase().replace(/[^a-z0-9]/g, ''))
+        .filter(tag => tag.length > 0);
+
+    const tagsString = tags.join(' ');
+
     const dataToSave = {
-        title: document.getElementById('buyModeDirectoryInput').value.trim(),
+        title: title,
+        directory: directory,
+        tags: tagsString
     };
+
     localStorage.setItem('conex_data', JSON.stringify(dataToSave));
+
     loadEditorState();
 
     closeDialog();

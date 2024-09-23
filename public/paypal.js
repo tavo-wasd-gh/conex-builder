@@ -52,6 +52,7 @@ paypal.Buttons({
                 banner: savedData.banner,
                 title: savedData.title,
                 slogan: savedData.slogan,
+                tags: savedData.tags,
                 editor_data: savedData.editor_data
             };
 
